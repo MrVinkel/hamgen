@@ -30,8 +30,12 @@ public class Generate extends AbstractMojo {
             getLogger().info("Skipping");
         }
 
-        HamProperties properties = new HamProperties();
-        HamcrestGenerator generator = new HamcrestGenerator(properties);
-        generator.generateMatchers();
+        try {
+            HamProperties properties = new HamProperties();
+            HamcrestGenerator generator = new HamcrestGenerator(properties);
+            generator.generateMatchers();
+        } catch (Exception e) {
+            throw new MojoExecutionException("Buhuuu it failed :(", e);
+        }
     }
 }

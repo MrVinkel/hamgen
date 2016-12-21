@@ -12,7 +12,7 @@ public class HamProperties extends Properties {
     }
 
     public synchronized Object setProperty(Key key, String value) {
-        return super.setProperty(key.getValue(), value);
+        return super.setProperty(key.getName(), value);
     }
 
     @Override
@@ -21,37 +21,48 @@ public class HamProperties extends Properties {
     }
 
     public String getProperty(Key key) {
-        return super.getProperty(key.getValue());
+        if(containsKey(key.getName())) {
+            // todo return default if is null or empty?
+            return super.getProperty(key.getName());
+        }
+        return key.getDefaultValue();
     }
 
     @Override
     public String getProperty(String key, String defaultValue) {
-        return getProperty(toKey(key), defaultValue);
+        return getProperty(toKey(key));
     }
 
     public String getProperty(Key key, String defaultValue) {
-        return super.getProperty(key.getValue(), defaultValue);
+        return getProperty(key.getName(), defaultValue);
     }
 
     enum Key {
-        OUTPUT_DIR("outputdir"),
-        PACKAGE_NAME("packagename"),
-        PACKAGE_POST_FIX("packagepostfix"),
-        MATCHER_PRE_FIX("matcherprefix");
+        OUTPUT_DIR("outputdir", "target/generate-sources"),
+        PACKAGE_NAME("packagename", null),
+        PACKAGE_POST_FIX("packagepostfix", ".matcher"),
+        MATCHER_PRE_FIX("matcherprefix", "Is"),
+        MATCHER_POST_FIX("matcherpostfix", "Matcher");
 
-        private String value;
+        private String name;
+        private String defaultValue;
 
-        Key(String value) {
-            this.value = value;
+        Key(String name, String defaultValue) {
+            this.name = name;
+            this.defaultValue = defaultValue;
         }
 
-        public String getValue() {
-            return value;
+        public String getName() {
+            return name;
+        }
+
+        public String getDefaultValue() {
+            return defaultValue;
         }
 
         public static Key toKey(String keyToParse) {
             for(Key key : values()) {
-                if(key.getValue().toLowerCase().equals(keyToParse.toLowerCase())) {
+                if(key.getName().toLowerCase().equals(keyToParse.toLowerCase())) {
                     return key;
                 }
             }
