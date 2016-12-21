@@ -34,7 +34,10 @@ public class HamProperties extends Properties {
     }
 
     enum Key {
-        OUTPUT_DIR("outputdir");
+        OUTPUT_DIR("outputdir"),
+        PACKAGE_NAME("packagename"),
+        PACKAGE_POST_FIX("packagepostfix"),
+        MATCHER_PRE_FIX("matcherprefix");
 
         private String value;
 
