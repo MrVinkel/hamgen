@@ -1,5 +1,7 @@
 package dk.martinvinkel.hamgen.mojo;
 
+import dk.martinvinkel.hamgen.HamProperties;
+import dk.martinvinkel.hamgen.HamcrestGenerator;
 import dk.martinvinkel.hamgen.log.MavenLogger;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -27,5 +29,9 @@ public class Generate extends AbstractMojo {
         if(skip) {
             getLogger().info("Skipping");
         }
+
+        HamProperties properties = new HamProperties();
+        HamcrestGenerator generator = new HamcrestGenerator(properties);
+        generator.generateMatchers();
     }
 }
