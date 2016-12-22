@@ -2,15 +2,12 @@ package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.*;
 import dk.martinvinkel.hamgen.log.Logger;
-import dk.martinvinkel.hamgen.util.StringUtil;
 import org.reflections.Reflections;
 
 import javax.xml.bind.annotation.XmlType;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.*;
 
@@ -24,7 +21,7 @@ public class HamcrestGenerator {
     }
 
     public void generateMatchers() throws IOException {
-        LOGGER.info("Generate Matchers start");
+        LOGGER.info("Generating matchers..");
 
         File outputDir = createOutputDir();
 
@@ -41,7 +38,7 @@ public class HamcrestGenerator {
             writeFile(clazz.getPackage().getName(), matcherClass, outputDir);
         }
 
-        LOGGER.info("Generate Matchers stop");
+        LOGGER.info("Done!");
     }
 
     private File createOutputDir() {
