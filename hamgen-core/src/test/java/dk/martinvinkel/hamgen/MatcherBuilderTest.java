@@ -1,9 +1,17 @@
 package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.TypeSpec;
+import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestData;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 public class MatcherBuilderTest {
 
@@ -16,7 +24,7 @@ public class MatcherBuilderTest {
                         "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
-                        "    mismatchDesc.appendTest(\"}\");\n" +
+                        "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
@@ -47,7 +55,7 @@ public class MatcherBuilderTest {
                         "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
-                        "    mismatchDesc.appendTest(\"}\");\n" +
+                        "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
@@ -82,7 +90,7 @@ public class MatcherBuilderTest {
                         "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
-                        "    mismatchDesc.appendTest(\"}\");\n" +
+                        "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
@@ -113,24 +121,25 @@ public class MatcherBuilderTest {
     public void t0203_WithFields() throws Exception {
         // Arrange
         String expected =
-                "public class TestClassMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
+                "public class MatcherBuilderTestDataMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
                         "  protected org.hamcrest.Matcher myFieldMatcher;\n" +
                         "\n" +
                         "  protected org.hamcrest.Matcher mySecondFieldMatcher;\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
+                        "  public boolean matchesSafely(com.test.MatcherBuilderTestData actual,\n" +
+                        "      org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
-                        "    if(!myFieldMatcher.matches(actual.someMethod())) {\n" +
-                        "      reportMismatch(\"myFieldMatcher\", myFieldMatcher, actual.someMethod(), mismatchDesc, matches);\n" +
+                        "    if(!myFieldMatcher.matches(actual.getMyField())) {\n" +
+                        "      reportMismatch(\"myFieldMatcher\", myFieldMatcher, actual.getMyField(), mismatchDesc, matches);\n" +
                         "      matches = false;\n" +
                         "    }\n" +
-                        "    if(!mySecondFieldMatcher.matches(actual.someMethod())) {\n" +
-                        "      reportMismatch(\"mySecondFieldMatcher\", mySecondFieldMatcher, actual.someMethod(), mismatchDesc, matches);\n" +
+                        "    if(!mySecondFieldMatcher.matches(actual.getMySecondField())) {\n" +
+                        "      reportMismatch(\"mySecondFieldMatcher\", mySecondFieldMatcher, actual.getMySecondField(), mismatchDesc, matches);\n" +
                         "      matches = false;\n" +
                         "    }\n" +
-                        "    mismatchDesc.appendTest(\"}\");\n" +
+                        "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
@@ -141,22 +150,28 @@ public class MatcherBuilderTest {
                         "    desc.appendDescriptionOf(myFieldMatcher);\n" +
                         "    desc.appendText(\", \");\n" +
                         "    desc.appendText(\"mySecondFieldMatcher \");\n" +
-                        "    desc.appendescriptionOf(mySecondFieldMatcher);\n" +
+                        "    desc.appendDescriptionOf(mySecondFieldMatcher);\n" +
                         "    desc.appendText(\"}\");\n" +
                         "  }\n" +
                         "\n" +
                         "  @org.hamcrest.Factory\n" +
-                        "  public static com.test.matcher.TestClassMatcher IsTestClass(com.test.TestClass expected) {\n" +
-                        "    return new com.test.matcher.TestClassMatcher(expected);\n" +
+                        "  public static com.test.matcher.MatcherBuilderTestDataMatcher IsMatcherBuilderTestData(com.test.MatcherBuilderTestData expected) {\n" +
+                        "    return new com.test.matcher.MatcherBuilderTestDataMatcher(expected);\n" +
                         "  }\n" +
                         "}\n";
+
+
+        Method myFirstGetter = MatcherBuilderTestData.class.getMethod("getMyField");
+        Method mySecondGetter = MatcherBuilderTestData.class.getMethod("getMySecondField");
+
         // Act
-        TypeSpec result = MatcherBuilder.matcherBuild("com.test", "TestClass")
-                .matchField(String.class, "myField")
-                .matchField(Double.class, "mySecondField")
+        TypeSpec result = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestData")
+                .matchField(myFirstGetter)
+                .matchField(mySecondGetter)
                 .build();
 
         // Assert
         assertEquals(expected, result.toString());
     }
+
 }

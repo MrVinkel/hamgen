@@ -3,16 +3,13 @@ package dk.martinvinkel.hamgen;
 import com.squareup.javapoet.*;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
-import org.hamcrest.Matcher;
 
+import java.lang.reflect.Method;
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_PRE_FIX;
 import static dk.martinvinkel.hamgen.HamProperties.Key.PACKAGE_POST_FIX;
-import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -23,7 +20,7 @@ public class MatcherBuilder {
     private String originalPackageName;
     private String packagePostFix = PACKAGE_POST_FIX.getDefaultValue();
     private String matcherPreFix = MATCHER_PRE_FIX.getDefaultValue();
-    private List<Entry<TypeName, String>> matcherFields = new ArrayList<>();
+    private List<MatcherField> matcherFields = new ArrayList<>();
 
     private MatcherBuilder(String originalPackageName, String originalClassName) {
         this.originalPackageName = originalPackageName.trim();
@@ -53,15 +50,19 @@ public class MatcherBuilder {
         return this;
     }
 
-    public MatcherBuilder matchField(Class<?> type, String name) {
-        TypeName typeName = ClassName.get(type);
-        matcherFields.add(new SimpleEntry<>(typeName, name.trim() + matcherNamePostFix));
+    public MatcherBuilder matchField(Method getterMethod) {
+        Class<?> type = getterMethod.getReturnType();
+        String name = getterMethod.getName();
+        MatcherField matcherField = MatcherField.builder(type, name).withPostFix(matcherNamePostFix).build();
+        matcherFields.add(matcherField);
         return this;
     }
 
-    public MatcherBuilder matchFields(List<Entry<Class<?>, String>> fields) {
-        for(Entry field : fields) {
-            matchField((Class<?>)field.getKey(), (String)field.getValue());
+    public MatcherBuilder matchFields(Method ...getterMethods) {
+        for(Method method : getterMethods) {
+            if(isGetterMethod(method)) {
+                matchField(method);
+            }
         }
         return this;
     }
@@ -71,7 +72,6 @@ public class MatcherBuilder {
         String matcherPackage = originalPackageName + packagePostFix;
         TypeName originalClass = ClassName.get(originalPackageName, originalClassName);
         TypeName matcherClass = ClassName.get(matcherPackage, matcherName);
-        TypeName matcher = ClassName.get(Matcher.class);
         TypeName description = ClassName.get(Description.class);
         TypeName hamGenDiagnosingMatcher = ClassName.get(HamGenDiagnosingMatcher.class);
 
@@ -107,34 +107,19 @@ public class MatcherBuilder {
                 .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "{");
 
         boolean firstField = true;
-        for (Entry matcherField : matcherFields) {
-            String matcherFieldName = (String) matcherField.getValue();
+        for (MatcherField matcherField : matcherFields) {
+            MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
 
-            // matcher fields
-            FieldSpec field = FieldSpec.builder(matcher, matcherFieldName)
-                    .addModifiers(PROTECTED)
-                    .build();
+            FieldSpec field = matcherFieldBuilder.buildFieldSpec();
             matcherClassBuilder.addField(field);
 
-            // descriptionTo
-            if(!firstField) {
-                descriptionToBuilder.addStatement("$N.appendText($S)", descriptionParameter, ", ");
-            }
-            descriptionToBuilder
-                    .addStatement("$N.appendText($S)", descriptionParameter, matcherFieldName + " ")
-                    .addStatement("$N.appendDescriptionOf($N)", descriptionParameter, matcherFieldName);
+            CodeBlock descriptionBlock = matcherFieldBuilder.buildDescriptionTo(firstField, descriptionParameter.name);
+            descriptionToBuilder.addCode(descriptionBlock);
+
+            CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualParameter, mismatchDescriptionParameter, matchesLocalField);
+            matchesSafelyBuilder.addCode(matcherSafelyBlock);
 
             firstField = false;
-
-            // matchesSafely
-            CodeBlock codeBlock = CodeBlock.builder()
-                    .beginControlFlow("if(!$N.matches($N.$N()))", matcherFieldName, actualParameter, "someMethod")
-                    .addStatement("reportMismatch($S, $N, $N.$N(), $N, $N)", matcherFieldName, matcherFieldName, actualParameter, "someMethod", mismatchDescriptionParameter, matchesLocalField)
-                    .addStatement("$N = false", matchesLocalField)
-                    .endControlFlow()
-                    .build();
-
-            matchesSafelyBuilder.addCode(codeBlock);
         }
 
         MethodSpec descriptionToMethod = descriptionToBuilder
@@ -142,7 +127,7 @@ public class MatcherBuilder {
                 .build();
 
         MethodSpec matchesSafelyMethod = matchesSafelyBuilder
-                .addStatement("$N.appendTest($S)", mismatchDescriptionParameter, "}")
+                .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "}")
                 .addStatement("return $N", matchesLocalField)
                 .build();
 
@@ -150,5 +135,9 @@ public class MatcherBuilder {
         matcherClassBuilder.addMethod(descriptionToMethod);
         matcherClassBuilder.addMethod(factoryMethod);
         return matcherClassBuilder.build();
+    }
+
+    private boolean isGetterMethod(Method method) {
+        return method.getName().toLowerCase().startsWith("get");
     }
 }
