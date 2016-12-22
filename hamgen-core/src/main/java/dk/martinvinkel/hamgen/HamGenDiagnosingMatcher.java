@@ -40,7 +40,7 @@ public abstract class HamGenDiagnosingMatcher<T> extends BaseMatcher<T> {
         }
     }
 
-    private static void reportMismatch(String name, Matcher<?> matcher, Object item, Description mismatchDescription, boolean firstMismatch) {
+    protected static void reportMismatch(String name, Matcher<?> matcher, Object item, Description mismatchDescription, boolean firstMismatch) {
         if (!firstMismatch) {
             mismatchDescription.appendText(", ");
         }

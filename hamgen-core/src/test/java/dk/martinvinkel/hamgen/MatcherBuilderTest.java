@@ -141,7 +141,7 @@ public class MatcherBuilderTest {
                         "    desc.appendDescriptionOf(myFieldMatcher);\n" +
                         "    desc.appendText(\", \");\n" +
                         "    desc.appendText(\"mySecondFieldMatcher \");\n" +
-                        "    desc.appendDescriptionOf(mySecondFieldMatcher);\n" +
+                        "    desc.appendescriptionOf(mySecondFieldMatcher);\n" +
                         "    desc.appendText(\"}\");\n" +
                         "  }\n" +
                         "\n" +
