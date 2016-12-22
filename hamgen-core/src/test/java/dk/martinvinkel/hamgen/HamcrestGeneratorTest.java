@@ -13,10 +13,8 @@ public class HamcrestGeneratorTest {
 
 
     @Test
-    public void t0101_buildFactoryMethod() throws Exception {
-        HamProperties properties = new HamProperties();
-        properties.setProperty(MATCHER_PRE_FIX, "Is");
-        HamcrestGenerator generator = new HamcrestGenerator(properties);
+    public void t0101_meeh() {
 
     }
+
 }

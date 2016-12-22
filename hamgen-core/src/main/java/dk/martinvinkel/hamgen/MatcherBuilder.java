@@ -94,6 +94,18 @@ public class MatcherBuilder {
                 .addParameter(descriptionParameter)
                 .addStatement("$N.appendText($S)", descriptionParameter ,"{");
 
+        ParameterSpec actualParameter = ParameterSpec.builder(originalClass, "actual").build();
+        ParameterSpec mismatchDescriptionParameter = ParameterSpec.builder(description, "mismatchDesc").build();
+        ParameterSpec matchesLocalField = ParameterSpec.builder(TypeName.BOOLEAN, "matches").build();
+        MethodSpec.Builder matchesSafelyBuilder = MethodSpec.methodBuilder("matchesSafely")
+                .addAnnotation(Override.class)
+                .addModifiers(PUBLIC)
+                .returns(TypeName.BOOLEAN)
+                .addParameter(actualParameter)
+                .addParameter(mismatchDescriptionParameter)
+                .addStatement("$T $N = false", matchesLocalField.type, matchesLocalField)
+                .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "{");
+
         boolean firstField = true;
         for (Entry matcherField : matcherFields) {
             String matcherFieldName = (String) matcherField.getValue();
@@ -104,31 +116,39 @@ public class MatcherBuilder {
                     .build();
             matcherClassBuilder.addField(field);
 
-            // description to
+            // descriptionTo
             if(!firstField) {
-                descriptionToBuilder.addStatement("$N.appendText(\", \")", descriptionParameter);
+                descriptionToBuilder.addStatement("$N.appendText($S)", descriptionParameter, ", ");
             }
             descriptionToBuilder
                     .addStatement("$N.appendText($S)", descriptionParameter, matcherFieldName + " ")
                     .addStatement("$N.appendDescriptionOf($N)", descriptionParameter, matcherFieldName);
 
             firstField = false;
+
+            // matchesSafely
+            CodeBlock codeBlock = CodeBlock.builder()
+                    .beginControlFlow("if(!$N.matches($N.$N()))", matcherFieldName, actualParameter, "someMethod")
+                    .addStatement("reportMismatch($S, $N, $N.$N(), $N, $N)", matcherFieldName, matcherFieldName, actualParameter, "someMethod", mismatchDescriptionParameter, matchesLocalField)
+                    .addStatement("$N = false", matchesLocalField)
+                    .endControlFlow()
+                    .build();
+
+            matchesSafelyBuilder.addCode(codeBlock);
         }
-
-
-        /**
-         * if (!color.matches(lightsaber.getColor())) {
-         reportMismatch("color", color, lightsaber.getColor(), mismatchDescription, matches);
-         matches = false;
-         }
-         */
 
         MethodSpec descriptionToMethod = descriptionToBuilder
                 .addStatement("$N.appendText($S)", descriptionParameter ,"}")
                 .build();
 
-        matcherClassBuilder.addMethod(factoryMethod);
+        MethodSpec matchesSafelyMethod = matchesSafelyBuilder
+                .addStatement("$N.appendTest($S)", mismatchDescriptionParameter, "}")
+                .addStatement("return $N", matchesLocalField)
+                .build();
+
+        matcherClassBuilder.addMethod(matchesSafelyMethod);
         matcherClassBuilder.addMethod(descriptionToMethod);
+        matcherClassBuilder.addMethod(factoryMethod);
         return matcherClassBuilder.build();
     }
 }
