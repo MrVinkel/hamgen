@@ -3,15 +3,9 @@ package dk.martinvinkel.hamgen;
 import com.squareup.javapoet.TypeSpec;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestData;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 public class MatcherBuilderTest {
 
@@ -20,6 +14,9 @@ public class MatcherBuilderTest {
         // Arrange
         String expected =
                 "public class TestClassMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
+                        "  public TestClassMatcher(com.test.TestClass expected) {\n" +
+                        "  }\n" +
+                        "\n" +
                         "  @java.lang.Override\n" +
                         "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
@@ -51,6 +48,9 @@ public class MatcherBuilderTest {
         // Arrange
         String expected =
                 "public class TestClassMyPost extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
+                        "  public TestClassMyPost(com.test.TestClass expected) {\n" +
+                        "  }\n" +
+                        "\n" +
                         "  @java.lang.Override\n" +
                         "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
@@ -86,6 +86,9 @@ public class MatcherBuilderTest {
         // Arrange
         String expected =
                 "public class TestClassMyPost extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
+                        "  public TestClassMyPost(com.test.TestClass expected) {\n" +
+                        "  }\n" +
+                        "\n" +
                         "  @java.lang.Override\n" +
                         "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
@@ -125,6 +128,11 @@ public class MatcherBuilderTest {
                         "  protected org.hamcrest.Matcher myFieldMatcher;\n" +
                         "\n" +
                         "  protected org.hamcrest.Matcher mySecondFieldMatcher;\n" +
+                        "\n" +
+                        "  public MatcherBuilderTestDataMatcher(com.test.MatcherBuilderTestData expected) {\n" +
+                        "    this.myFieldMatcher = expected.getMyField() == null || expected.getMyField().isEmpty() ? isEmptyOrNullString() : is(expected.getMyField());\n" +
+                        "    this.mySecondFieldMatcher = expected.getMySecondField() == null ? nullValue() : is(expected.getMySecondField());\n" +
+                        "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
                         "  public boolean matchesSafely(com.test.MatcherBuilderTestData actual,\n" +

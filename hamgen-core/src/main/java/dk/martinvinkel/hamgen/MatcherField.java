@@ -107,7 +107,7 @@ public class MatcherField {
                 throw new IllegalStateException("Not a getter function " + getterName);
             }
             this.matcherField.setGetterName(getterName);
-            withName(StringUtil.decapitalize(getterName.substring(3)));
+            withName(StringUtil.deCapitalizeFirstLetter(getterName.substring(3)));
             return this;
         }
 
@@ -141,6 +141,21 @@ public class MatcherField {
                     .addStatement("$N = false", matchesLocalField)
                     .endControlFlow()
                     .build();
+        }
+
+        public CodeBlock buildMatcherInitialization(String expectedName) {
+            if (matcherField.getType() == String.class) {
+                return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
+                        matcherField.getName(), expectedName, matcherField.getGetterName(),
+                        expectedName, matcherField.getGetterName(),
+                        expectedName, matcherField.getGetterName())
+                        .build();
+            } else {
+                return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : is($N.$N())",
+                        matcherField.getName(), expectedName, matcherField.getGetterName(),
+                        expectedName, matcherField.getGetterName())
+                        .build();
+            }
         }
 
     }

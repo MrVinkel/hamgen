@@ -6,7 +6,7 @@ public class StringUtil {
         // Util class
     }
 
-    public static String decapitalize(String string) {
+    public static String deCapitalizeFirstLetter(String string) {
         if (string == null || string.length() == 0) {
             return string;
         }

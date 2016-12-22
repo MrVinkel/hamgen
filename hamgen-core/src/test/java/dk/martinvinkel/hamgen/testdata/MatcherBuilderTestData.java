@@ -9,7 +9,11 @@ public final class MatcherBuilderTestData {
         return "getMyField";
     }
 
-    public String getMySecondField() {
-        return "getMySecondField";
+    public double getMySecondField() {
+        return 42.0;
+    }
+
+    public int myRandomFunction() {
+        return 42;
     }
 }

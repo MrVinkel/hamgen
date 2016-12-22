@@ -13,7 +13,7 @@ public class StringUtilTest {
         String expected = "myString";
 
         // Act
-        String result = StringUtil.decapitalize(input);
+        String result = StringUtil.deCapitalizeFirstLetter(input);
 
         // Assert
         assertEquals(expected, result);
@@ -26,7 +26,7 @@ public class StringUtilTest {
         String expected = "m";
 
         // Act
-        String result = StringUtil.decapitalize(input);
+        String result = StringUtil.deCapitalizeFirstLetter(input);
 
         // Assert
         assertEquals(expected, result);
@@ -39,7 +39,7 @@ public class StringUtilTest {
         String expected = "";
 
         // Act
-        String result = StringUtil.decapitalize(input);
+        String result = StringUtil.deCapitalizeFirstLetter(input);
 
         // Assert
         assertEquals(expected, result);
@@ -52,7 +52,7 @@ public class StringUtilTest {
         String expected = null;
 
         // Act
-        String result = StringUtil.decapitalize(input);
+        String result = StringUtil.deCapitalizeFirstLetter(input);
 
         // Assert
         assertEquals(expected, result);

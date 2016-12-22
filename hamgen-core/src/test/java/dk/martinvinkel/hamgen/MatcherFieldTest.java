@@ -118,4 +118,44 @@ public class MatcherFieldTest {
         //Assert
         assertEquals(expected, result.toString());
     }
+
+    @Test
+    public void t0406_buildMatcherInitializationString() throws Exception {
+        //Arrange
+        MatcherField matcherField = new MatcherField();
+        matcherField.setName("something");
+        matcherField.setGetterName("getSomething");
+        matcherField.setFieldPostFix("Match");
+        matcherField.setType(String.class);
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+
+        String expected = "this.somethingMatch = expected.getSomething() == null || expected.getSomething().isEmpty() ? isEmptyOrNullString() : is(expected.getSomething());\n";
+
+        //Act
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected");
+
+        //Assert
+        assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void t0407_buildMatcherInitializationOtherType() throws Exception {
+        //Arrange
+        MatcherField matcherField = new MatcherField();
+        matcherField.setName("something");
+        matcherField.setGetterName("getSomething");
+        matcherField.setFieldPostFix("Match");
+        matcherField.setType(Double.class);
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+
+        String expected = "this.somethingMatch = expected.getSomething() == null ? nullValue() : is(expected.getSomething());\n";
+
+        //Act
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected");
+
+        //Assert
+        assertEquals(expected, result.toString());
+    }
+
+
 }

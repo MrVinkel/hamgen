@@ -14,6 +14,13 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 public class MatcherBuilder {
+    private static final String PARAM_NAME_EXPECTED = "expected";
+    private static final String PARAM_NAME_DESCRIPTION = "desc";
+    private static final String PARAM_NAME_ACTUAL = "actual";
+    private static final String PARAM_NAME_MISMATCH_DESCRIPTION = "mismatchDesc";
+
+    private static final String METHOD_NAME_DESCRIPTION_TO = "descriptionTo";
+    private static final String METHOD_NAME_MATCHES_SAFELY = "matchesSafely";
 
     private String originalClassName;
     private String matcherNamePostFix = MATCHER_POST_FIX.getDefaultValue();
@@ -51,6 +58,10 @@ public class MatcherBuilder {
     }
 
     public MatcherBuilder matchField(Method getterMethod) {
+        if(!isGetterMethod(getterMethod)) {
+            return this;
+        }
+
         Class<?> type = getterMethod.getReturnType();
         String name = getterMethod.getName();
         MatcherField matcherField = MatcherField.builder(type, name).withPostFix(matcherNamePostFix).build();
@@ -60,9 +71,7 @@ public class MatcherBuilder {
 
     public MatcherBuilder matchFields(Method ...getterMethods) {
         for(Method method : getterMethods) {
-            if(isGetterMethod(method)) {
-                matchField(method);
-            }
+            matchField(method);
         }
         return this;
     }
@@ -79,25 +88,31 @@ public class MatcherBuilder {
                 .superclass(hamGenDiagnosingMatcher)
                 .addModifiers(PUBLIC);
 
+        ParameterSpec expectedConstructorLocalParam = ParameterSpec.builder(originalClass, PARAM_NAME_EXPECTED).build();
+        MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
+                .addModifiers(PUBLIC)
+                .addParameter(expectedConstructorLocalParam);
+
+        ParameterSpec expectedFactoryLocalParam = ParameterSpec.builder(originalClass, PARAM_NAME_EXPECTED).build();
         MethodSpec factoryMethod = MethodSpec.methodBuilder(matcherPreFix + originalClassName)
                 .addAnnotation(Factory.class)
                 .returns(matcherClass)
                 .addModifiers(PUBLIC, STATIC)
-                .addParameter(originalClass, "expected")
-                .addStatement("return new $T(expected)", matcherClass)
+                .addParameter(expectedFactoryLocalParam)
+                .addStatement("return new $T($N)", matcherClass, expectedFactoryLocalParam)
                 .build();
 
-        ParameterSpec descriptionParameter = ParameterSpec.builder(description, "desc").build();
-        MethodSpec.Builder descriptionToBuilder = MethodSpec.methodBuilder("descriptionTo")
+        ParameterSpec descriptionParameter = ParameterSpec.builder(description, PARAM_NAME_DESCRIPTION).build();
+        MethodSpec.Builder descriptionToBuilder = MethodSpec.methodBuilder(METHOD_NAME_DESCRIPTION_TO)
                 .addAnnotation(Override.class)
                 .addModifiers(PUBLIC)
                 .addParameter(descriptionParameter)
                 .addStatement("$N.appendText($S)", descriptionParameter ,"{");
 
-        ParameterSpec actualParameter = ParameterSpec.builder(originalClass, "actual").build();
-        ParameterSpec mismatchDescriptionParameter = ParameterSpec.builder(description, "mismatchDesc").build();
+        ParameterSpec actualParameter = ParameterSpec.builder(originalClass, PARAM_NAME_ACTUAL).build();
+        ParameterSpec mismatchDescriptionParameter = ParameterSpec.builder(description, PARAM_NAME_MISMATCH_DESCRIPTION).build();
         ParameterSpec matchesLocalField = ParameterSpec.builder(TypeName.BOOLEAN, "matches").build();
-        MethodSpec.Builder matchesSafelyBuilder = MethodSpec.methodBuilder("matchesSafely")
+        MethodSpec.Builder matchesSafelyBuilder = MethodSpec.methodBuilder(METHOD_NAME_MATCHES_SAFELY)
                 .addAnnotation(Override.class)
                 .addModifiers(PUBLIC)
                 .returns(TypeName.BOOLEAN)
@@ -113,11 +128,14 @@ public class MatcherBuilder {
             FieldSpec field = matcherFieldBuilder.buildFieldSpec();
             matcherClassBuilder.addField(field);
 
-            CodeBlock descriptionBlock = matcherFieldBuilder.buildDescriptionTo(firstField, descriptionParameter.name);
-            descriptionToBuilder.addCode(descriptionBlock);
+            CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name);
+            constructorBuilder.addCode(constructorBlock);
 
             CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualParameter, mismatchDescriptionParameter, matchesLocalField);
             matchesSafelyBuilder.addCode(matcherSafelyBlock);
+
+            CodeBlock descriptionBlock = matcherFieldBuilder.buildDescriptionTo(firstField, descriptionParameter.name);
+            descriptionToBuilder.addCode(descriptionBlock);
 
             firstField = false;
         }
@@ -131,6 +149,9 @@ public class MatcherBuilder {
                 .addStatement("return $N", matchesLocalField)
                 .build();
 
+        MethodSpec constructorMethod = constructorBuilder.build();
+
+        matcherClassBuilder.addMethod(constructorMethod);
         matcherClassBuilder.addMethod(matchesSafelyMethod);
         matcherClassBuilder.addMethod(descriptionToMethod);
         matcherClassBuilder.addMethod(factoryMethod);
