@@ -29,11 +29,11 @@ public class MatcherBuilderTest {
         // Arrange
         String expected =
                 "public class TestClassMyPost {\n" +
-                        "  @org.hamcrest.Factory\n" +
-                        "  public static com.test.My.Package.TestClassMyPost MyPreTestClass(com.test.TestClass expected) {\n" +
-                        "    return new com.test.My.Package.TestClassMyPost(expected);\n" +
-                        "  }\n" +
-                        "}\n";
+                "  @org.hamcrest.Factory\n" +
+                "  public static com.test.My.Package.TestClassMyPost MyPreTestClass(com.test.TestClass expected) {\n" +
+                "    return new com.test.My.Package.TestClassMyPost(expected);\n" +
+                "  }\n" +
+                "}\n";
         // Act
         TypeSpec result = MatcherBuilder.matcherBuild("com.test", "TestClass")
                 .withMatcherNamePostfix("MyPost")
@@ -50,16 +50,41 @@ public class MatcherBuilderTest {
         // Arrange
         String expected =
                 "public class TestClassMyPost {\n" +
-                        "  @org.hamcrest.Factory\n" +
-                        "  public static com.test.My.Package.TestClassMyPost MyPreTestClass(com.test.TestClass expected) {\n" +
-                        "    return new com.test.My.Package.TestClassMyPost(expected);\n" +
-                        "  }\n" +
-                        "}\n";
+                "  @org.hamcrest.Factory\n" +
+                "  public static com.test.My.Package.TestClassMyPost MyPreTestClass(com.test.TestClass expected) {\n" +
+                "    return new com.test.My.Package.TestClassMyPost(expected);\n" +
+                "  }\n" +
+                "}\n";
         // Act
         TypeSpec result = MatcherBuilder.matcherBuild("com.test", "TestClass")
                 .withMatcherNamePostfix("MyPost")
                 .withMatcherPrefix("MyPre")
                 .withPackagePostFix(".My.Package")
+                .build();
+
+        // Assert
+        assertEquals(expected, result.toString());
+    }
+
+
+    @Test
+    public void t0203_WithFields() throws Exception {
+        // Arrange
+        String expected =
+                "public class TestClassMatcher {\n" +
+                "  protected org.hamcrest.Matcher myFieldMatcher;\n"+
+                "\n"+
+                "  protected org.hamcrest.Matcher mySecondFieldMatcher;\n"+
+                "\n"+
+                "  @org.hamcrest.Factory\n"+
+                "  public static com.test.matcher.TestClassMatcher IsTestClass(com.test.TestClass expected) {\n"+
+                "    return new com.test.matcher.TestClassMatcher(expected);\n"+
+                "  }\n"+
+                "}\n";
+        // Act
+        TypeSpec result = MatcherBuilder.matcherBuild("com.test", "TestClass")
+                .matchField(String.class, "myField")
+                .matchField(Double.class, "mySecondField")
                 .build();
 
         // Assert
