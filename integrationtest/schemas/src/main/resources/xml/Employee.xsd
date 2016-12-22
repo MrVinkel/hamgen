@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://martinvinkel.dk/hamgen/testdata"
+           xmlns:ns1="http://martinvinkel.dk/hamgen/testdata">
+    <xs:import namespace="http://martinvinkel.dk/hamgen/testdata" schemaLocation="import.xsd"/>
+
+    <xs:element name="Employee">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="JobPosition" type="xs:string"/>
+                <xs:element name="Status" type="ns1:Status"/>
+                <xs:element name="Pay" type="xs:double"/>
+                <xs:element ref="ns1:PersonNameStruct"/>
+                <xs:element ref="ns1:Address"/>
+                <xs:element name="Email" type="ns1:EmailAddress"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="Status">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PENDING"/>
+            <xs:enumeration value="HIRED"/>
+            <xs:enumeration value="FIRED"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="EmailAddress">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[^@]+@[^\.]+\..+"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

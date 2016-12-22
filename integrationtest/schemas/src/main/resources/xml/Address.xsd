@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://martinvinkel.dk/hamgen/testdata" xmlns:ns1="http://martinvinkel.dk/hamgen/testdata">
+    <xs:element name="Address">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="CityName" type="xs:string"/>
+                <xs:element name="StreetName" type="xs:string"/>
+                <xs:element name="StreetNumber" type="xs:string"/>
+                <xs:element name="Floor" type="xs:int" minOccurs="0"/>
+                <xs:element name="PostCode" type="ns1:string4"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="string4">
+        <xs:restriction base="xs:string">
+            <xs:length value="4"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
