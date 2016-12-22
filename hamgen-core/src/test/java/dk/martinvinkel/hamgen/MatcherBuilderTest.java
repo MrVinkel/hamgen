@@ -11,10 +11,16 @@ public class MatcherBuilderTest {
     public void t0201_MatcherBuilder() throws Exception {
         // Arrange
         String expected =
-                "public class TestClassMatcher {\n" +
+                "public class TestClassMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
                 "  @org.hamcrest.Factory\n" +
                 "  public static com.test.matcher.TestClassMatcher IsTestClass(com.test.TestClass expected) {\n" +
                 "    return new com.test.matcher.TestClassMatcher(expected);\n" +
+                "  }\n" +
+                "\n" +
+                "  @java.lang.Override\n" +
+                "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                "    desc.appendText(\"{\");\n" +
+                "    desc.appendText(\"}\");\n" +
                 "  }\n" +
                 "}\n";
         // Act
@@ -28,10 +34,16 @@ public class MatcherBuilderTest {
     public void t0202_MatcherBuilderCustomPrePostFixes() throws Exception {
         // Arrange
         String expected =
-                "public class TestClassMyPost {\n" +
+                "public class TestClassMyPost extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
                 "  @org.hamcrest.Factory\n" +
                 "  public static com.test.My.Package.TestClassMyPost MyPreTestClass(com.test.TestClass expected) {\n" +
                 "    return new com.test.My.Package.TestClassMyPost(expected);\n" +
+                "  }\n" +
+                "\n" +
+                "  @java.lang.Override\n" +
+                "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                "    desc.appendText(\"{\");\n" +
+                "    desc.appendText(\"}\");\n" +
                 "  }\n" +
                 "}\n";
         // Act
@@ -49,10 +61,16 @@ public class MatcherBuilderTest {
     public void t0202_MatcherBuilderCustomPrePostFixesPackageWithDots() throws Exception {
         // Arrange
         String expected =
-                "public class TestClassMyPost {\n" +
+                "public class TestClassMyPost extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
                 "  @org.hamcrest.Factory\n" +
                 "  public static com.test.My.Package.TestClassMyPost MyPreTestClass(com.test.TestClass expected) {\n" +
                 "    return new com.test.My.Package.TestClassMyPost(expected);\n" +
+                "  }\n" +
+                "\n" +
+                "  @java.lang.Override\n" +
+                "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                "    desc.appendText(\"{\");\n" +
+                "    desc.appendText(\"}\");\n" +
                 "  }\n" +
                 "}\n";
         // Act
@@ -71,7 +89,7 @@ public class MatcherBuilderTest {
     public void t0203_WithFields() throws Exception {
         // Arrange
         String expected =
-                "public class TestClassMatcher {\n" +
+                "public class TestClassMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
                 "  protected org.hamcrest.Matcher myFieldMatcher;\n"+
                 "\n"+
                 "  protected org.hamcrest.Matcher mySecondFieldMatcher;\n"+
@@ -80,6 +98,17 @@ public class MatcherBuilderTest {
                 "  public static com.test.matcher.TestClassMatcher IsTestClass(com.test.TestClass expected) {\n"+
                 "    return new com.test.matcher.TestClassMatcher(expected);\n"+
                 "  }\n"+
+                "\n" +
+                "  @java.lang.Override\n" +
+                "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                "    desc.appendText(\"{\");\n" + "" +
+                "    desc.appendText(\"myFieldMatcher \");\n" +
+                "    desc.appendDescriptionOf(myFieldMatcher);\n" +
+                "    desc.appendText(\", \");\n" +
+                "    desc.appendText(\"mySecondFieldMatcher \");\n" +
+                "    desc.appendDescriptionOf(mySecondFieldMatcher);\n" +
+                "    desc.appendText(\"}\");\n" +
+                "  }\n" +
                 "}\n";
         // Act
         TypeSpec result = MatcherBuilder.matcherBuild("com.test", "TestClass")

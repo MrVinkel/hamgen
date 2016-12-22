@@ -1,10 +1,10 @@
 package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.*;
+import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
@@ -72,6 +72,12 @@ public class MatcherBuilder {
         TypeName originalClass = ClassName.get(originalPackageName, originalClassName);
         TypeName matcherClass = ClassName.get(matcherPackage, matcherName);
         TypeName matcher = ClassName.get(Matcher.class);
+        TypeName description = ClassName.get(Description.class);
+        TypeName hamGenDiagnosingMatcher = ClassName.get(HamGenDiagnosingMatcher.class);
+
+        TypeSpec.Builder matcherClassBuilder = TypeSpec.classBuilder(matcherName)
+                .superclass(hamGenDiagnosingMatcher)
+                .addModifiers(PUBLIC);
 
         MethodSpec factoryMethod = MethodSpec.methodBuilder(matcherPreFix + originalClassName)
                 .addAnnotation(Factory.class)
@@ -81,17 +87,48 @@ public class MatcherBuilder {
                 .addStatement("return new $T(expected)", matcherClass)
                 .build();
 
-        TypeSpec.Builder matcherClassBuilder = TypeSpec.classBuilder(matcherName)
+        ParameterSpec descriptionParameter = ParameterSpec.builder(description, "desc").build();
+        MethodSpec.Builder descriptionToBuilder = MethodSpec.methodBuilder("descriptionTo")
+                .addAnnotation(Override.class)
                 .addModifiers(PUBLIC)
-                .addMethod(factoryMethod);
+                .addParameter(descriptionParameter)
+                .addStatement("$N.appendText($S)", descriptionParameter ,"{");
 
+        boolean firstField = true;
         for (Entry matcherField : matcherFields) {
-            FieldSpec field = FieldSpec.builder(matcher, (String) matcherField.getValue())
+            String matcherFieldName = (String) matcherField.getValue();
+
+            // matcher fields
+            FieldSpec field = FieldSpec.builder(matcher, matcherFieldName)
                     .addModifiers(PROTECTED)
                     .build();
             matcherClassBuilder.addField(field);
+
+            // description to
+            if(!firstField) {
+                descriptionToBuilder.addStatement("$N.appendText(\", \")", descriptionParameter);
+            }
+            descriptionToBuilder
+                    .addStatement("$N.appendText($S)", descriptionParameter, matcherFieldName + " ")
+                    .addStatement("$N.appendDescriptionOf($N)", descriptionParameter, matcherFieldName);
+
+            firstField = false;
         }
 
+
+        /**
+         * if (!color.matches(lightsaber.getColor())) {
+         reportMismatch("color", color, lightsaber.getColor(), mismatchDescription, matches);
+         matches = false;
+         }
+         */
+
+        MethodSpec descriptionToMethod = descriptionToBuilder
+                .addStatement("$N.appendText($S)", descriptionParameter ,"}")
+                .build();
+
+        matcherClassBuilder.addMethod(factoryMethod);
+        matcherClassBuilder.addMethod(descriptionToMethod);
         return matcherClassBuilder.build();
     }
 }
