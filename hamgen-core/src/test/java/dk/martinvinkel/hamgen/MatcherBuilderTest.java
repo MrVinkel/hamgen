@@ -3,6 +3,7 @@ package dk.martinvinkel.hamgen;
 import com.squareup.javapoet.TypeSpec;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestData;
 import org.junit.Test;
+
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
@@ -18,15 +19,16 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
+                        "  public boolean matchesSafely(java.lang.Object item, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
+                        "    com.test.TestClass actual = (com.test.TestClass) item;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
                         "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                        "  public void describeTo(org.hamcrest.Description desc) {\n" +
                         "    desc.appendText(\"{\");\n" +
                         "    desc.appendText(\"}\");\n" +
                         "  }\n" +
@@ -52,15 +54,16 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
+                        "  public boolean matchesSafely(java.lang.Object item, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
+                        "    com.test.TestClass actual = (com.test.TestClass) item;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
                         "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                        "  public void describeTo(org.hamcrest.Description desc) {\n" +
                         "    desc.appendText(\"{\");\n" +
                         "    desc.appendText(\"}\");\n" +
                         "  }\n" +
@@ -90,15 +93,16 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public boolean matchesSafely(com.test.TestClass actual, org.hamcrest.Description mismatchDesc) {\n" +
+                        "  public boolean matchesSafely(java.lang.Object item, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
+                        "    com.test.TestClass actual = (com.test.TestClass) item;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
                         "    mismatchDesc.appendText(\"}\");\n" +
                         "    return matches;\n" +
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                        "  public void describeTo(org.hamcrest.Description desc) {\n" +
                         "    desc.appendText(\"{\");\n" +
                         "    desc.appendText(\"}\");\n" +
                         "  }\n" +
@@ -131,19 +135,19 @@ public class MatcherBuilderTest {
                         "\n" +
                         "  public MatcherBuilderTestDataMatcher(com.test.MatcherBuilderTestData expected) {\n" +
                         "    this.myFieldMatcher = expected.getMyField() == null || expected.getMyField().isEmpty() ? isEmptyOrNullString() : is(expected.getMyField());\n" +
-                        "    this.mySecondFieldMatcher = expected.getMySecondField() == null ? nullValue() : is(expected.getMySecondField());\n" +
+                        "    this.mySecondFieldMatcher = is(expected.getMySecondField());\n" +
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public boolean matchesSafely(com.test.MatcherBuilderTestData actual,\n" +
-                        "      org.hamcrest.Description mismatchDesc) {\n" +
+                        "  public boolean matchesSafely(java.lang.Object item, org.hamcrest.Description mismatchDesc) {\n" +
                         "    boolean matches = false;\n" +
+                        "    com.test.MatcherBuilderTestData actual = (com.test.MatcherBuilderTestData) item;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
-                        "    if(!myFieldMatcher.matches(actual.getMyField())) {\n" +
+                        "    if (!myFieldMatcher.matches(actual.getMyField())) {\n" +
                         "      reportMismatch(\"myFieldMatcher\", myFieldMatcher, actual.getMyField(), mismatchDesc, matches);\n" +
                         "      matches = false;\n" +
                         "    }\n" +
-                        "    if(!mySecondFieldMatcher.matches(actual.getMySecondField())) {\n" +
+                        "    if (!mySecondFieldMatcher.matches(actual.getMySecondField())) {\n" +
                         "      reportMismatch(\"mySecondFieldMatcher\", mySecondFieldMatcher, actual.getMySecondField(), mismatchDesc, matches);\n" +
                         "      matches = false;\n" +
                         "    }\n" +
@@ -152,7 +156,7 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
-                        "  public void descriptionTo(org.hamcrest.Description desc) {\n" +
+                        "  public void describeTo(org.hamcrest.Description desc) {\n" +
                         "    desc.appendText(\"{\");\n" + "" +
                         "    desc.appendText(\"myFieldMatcher \");\n" +
                         "    desc.appendDescriptionOf(myFieldMatcher);\n" +

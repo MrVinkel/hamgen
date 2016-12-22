@@ -6,10 +6,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.isA;
+import static org.hamcrest.Matchers.*;
 
 public class MatcherFieldMatcher extends HamGenDiagnosingMatcher {
     private Matcher nameMatcher;

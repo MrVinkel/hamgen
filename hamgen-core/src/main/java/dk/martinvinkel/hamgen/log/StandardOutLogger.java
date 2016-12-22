@@ -3,7 +3,7 @@ package dk.martinvinkel.hamgen.log;
 import static dk.martinvinkel.hamgen.log.Logger.LogLevel.*;
 
 public class StandardOutLogger extends Logger {
-    private static LogLevel level = INFO;
+    protected static LogLevel level = INFO;
 
     public StandardOutLogger() {}
 

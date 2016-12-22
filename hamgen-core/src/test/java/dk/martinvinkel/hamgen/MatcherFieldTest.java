@@ -145,10 +145,10 @@ public class MatcherFieldTest {
         matcherField.setName("something");
         matcherField.setGetterName("getSomething");
         matcherField.setFieldPostFix("Match");
-        matcherField.setType(Double.class);
+        matcherField.setType(double.class);
         MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
 
-        String expected = "this.somethingMatch = expected.getSomething() == null ? nullValue() : is(expected.getSomething());\n";
+        String expected = "this.somethingMatch = is(expected.getSomething());\n";
 
         //Act
         CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected");

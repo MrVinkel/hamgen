@@ -7,6 +7,7 @@ import org.hamcrest.Factory;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static com.squareup.javapoet.TypeName.OBJECT;
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_PRE_FIX;
 import static dk.martinvinkel.hamgen.HamProperties.Key.PACKAGE_POST_FIX;
@@ -16,10 +17,10 @@ import static javax.lang.model.element.Modifier.STATIC;
 public class MatcherBuilder {
     private static final String PARAM_NAME_EXPECTED = "expected";
     private static final String PARAM_NAME_DESCRIPTION = "desc";
-    private static final String PARAM_NAME_ACTUAL = "actual";
+    private static final String PARAM_NAME_ACTUAL_ITEM = "item";
     private static final String PARAM_NAME_MISMATCH_DESCRIPTION = "mismatchDesc";
 
-    private static final String METHOD_NAME_DESCRIPTION_TO = "descriptionTo";
+    private static final String METHOD_NAME_DESCRIPTION_TO = "describeTo";
     private static final String METHOD_NAME_MATCHES_SAFELY = "matchesSafely";
 
     private String originalClassName;
@@ -58,7 +59,7 @@ public class MatcherBuilder {
     }
 
     public MatcherBuilder matchField(Method getterMethod) {
-        if(!isGetterMethod(getterMethod)) {
+        if (!isGetterMethod(getterMethod)) {
             return this;
         }
 
@@ -69,8 +70,8 @@ public class MatcherBuilder {
         return this;
     }
 
-    public MatcherBuilder matchFields(Method ...getterMethods) {
-        for(Method method : getterMethods) {
+    public MatcherBuilder matchFields(Method... getterMethods) {
+        for (Method method : getterMethods) {
             matchField(method);
         }
         return this;
@@ -107,18 +108,20 @@ public class MatcherBuilder {
                 .addAnnotation(Override.class)
                 .addModifiers(PUBLIC)
                 .addParameter(descriptionParameter)
-                .addStatement("$N.appendText($S)", descriptionParameter ,"{");
+                .addStatement("$N.appendText($S)", descriptionParameter, "{");
 
-        ParameterSpec actualParameter = ParameterSpec.builder(originalClass, PARAM_NAME_ACTUAL).build();
+        ParameterSpec itemParameter = ParameterSpec.builder(OBJECT, PARAM_NAME_ACTUAL_ITEM).build();
+        ParameterSpec actualLocalParameter = ParameterSpec.builder(originalClass, "actual").build();
         ParameterSpec mismatchDescriptionParameter = ParameterSpec.builder(description, PARAM_NAME_MISMATCH_DESCRIPTION).build();
         ParameterSpec matchesLocalField = ParameterSpec.builder(TypeName.BOOLEAN, "matches").build();
         MethodSpec.Builder matchesSafelyBuilder = MethodSpec.methodBuilder(METHOD_NAME_MATCHES_SAFELY)
                 .addAnnotation(Override.class)
                 .addModifiers(PUBLIC)
                 .returns(TypeName.BOOLEAN)
-                .addParameter(actualParameter)
+                .addParameter(itemParameter)
                 .addParameter(mismatchDescriptionParameter)
                 .addStatement("$T $N = false", matchesLocalField.type, matchesLocalField)
+                .addStatement("$T $N = ($T) $N", actualLocalParameter.type, actualLocalParameter, actualLocalParameter.type, itemParameter)
                 .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "{");
 
         boolean firstField = true;
@@ -131,7 +134,7 @@ public class MatcherBuilder {
             CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name);
             constructorBuilder.addCode(constructorBlock);
 
-            CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualParameter, mismatchDescriptionParameter, matchesLocalField);
+            CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualLocalParameter, mismatchDescriptionParameter, matchesLocalField);
             matchesSafelyBuilder.addCode(matcherSafelyBlock);
 
             CodeBlock descriptionBlock = matcherFieldBuilder.buildDescriptionTo(firstField, descriptionParameter.name);
@@ -141,7 +144,7 @@ public class MatcherBuilder {
         }
 
         MethodSpec descriptionToMethod = descriptionToBuilder
-                .addStatement("$N.appendText($S)", descriptionParameter ,"}")
+                .addStatement("$N.appendText($S)", descriptionParameter, "}")
                 .build();
 
         MethodSpec matchesSafelyMethod = matchesSafelyBuilder

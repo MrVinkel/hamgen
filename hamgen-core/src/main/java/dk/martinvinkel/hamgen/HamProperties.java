@@ -37,12 +37,14 @@ public class HamProperties extends Properties {
         return getProperty(key.getName(), defaultValue);
     }
 
-    enum Key {
+    public enum Key {
         OUTPUT_DIR("outputdir", "target/generate-sources"),
         PACKAGE_NAME("packagename", null),
+        FAIL_ON_NO_CLASSES_FOUND("failOnNoClasses", "true"),
         PACKAGE_POST_FIX("packagepostfix", ".matcher"),
         MATCHER_PRE_FIX("matcherprefix", "Is"),
-        MATCHER_POST_FIX("matcherpostfix", "Matcher");
+        MATCHER_POST_FIX("matcherpostfix", "Matcher"),
+        ;
 
         private String name;
         private String defaultValue;

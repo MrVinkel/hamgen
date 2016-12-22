@@ -2,6 +2,7 @@ package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.*;
 import dk.martinvinkel.hamgen.log.Logger;
+import org.hamcrest.Matchers;
 import org.reflections.Reflections;
 
 import javax.xml.bind.annotation.XmlType;
@@ -28,7 +29,10 @@ public class HamcrestGenerator {
         Reflections reflections = new Reflections(properties.getProperty(PACKAGE_NAME));
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(XmlType.class);
 
+        checkClasses(annotatedClasses);
+
         for (Class<?> clazz : annotatedClasses) {
+            LOGGER.info("Building matcher for " + clazz.getName());
             TypeSpec matcherClass = MatcherBuilder.matcherBuild(clazz.getPackage().getName(), clazz.getSimpleName())
                     .withMatcherPrefix(properties.getProperty(MATCHER_PRE_FIX))
                     .withMatcherNamePostfix(properties.getProperty(MATCHER_POST_FIX))
@@ -41,14 +45,31 @@ public class HamcrestGenerator {
         LOGGER.info("Done!");
     }
 
+    private void checkClasses(Set<Class<?>> annotatedClasses) {
+        boolean failOnNoClasses = Boolean.parseBoolean(properties.getProperty(FAIL_ON_NO_CLASSES_FOUND));
+        if(annotatedClasses.size() == 0) {
+            if(failOnNoClasses) {
+                throw new IllegalStateException("No classes found!");
+            }
+            LOGGER.warn("No classes found!");
+        } else {
+            LOGGER.debug("Found " + annotatedClasses.size() + " classes");
+        }
+    }
+
     private File createOutputDir() {
         File outputDir = new File(properties.getProperty(OUTPUT_DIR));
+        LOGGER.debug("Creating output dir: " + outputDir.getAbsolutePath());
         outputDir.mkdirs();
         return outputDir;
     }
 
     private void writeFile(String packageName, TypeSpec matcherClass, File outputDir) throws IOException {
-        JavaFile file = JavaFile.builder(packageName + properties.getProperty(PACKAGE_POST_FIX), matcherClass).build();
+        LOGGER.debug("Writing file " + matcherClass.name + " to " + outputDir.getAbsolutePath());
+        JavaFile file = JavaFile.builder(packageName + properties.getProperty(PACKAGE_POST_FIX), matcherClass)
+                .addStaticImport(Matchers.class, "*")
+                .indent("    ")
+                .build();
         file.writeTo(outputDir);
     }
 

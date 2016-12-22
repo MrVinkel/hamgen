@@ -136,7 +136,7 @@ public class MatcherField {
 
         public CodeBlock buildMatchesSafely(ParameterSpec actualParameter, ParameterSpec mismatchDescriptionParameter, ParameterSpec matchesLocalField) {
             return CodeBlock.builder()
-                    .beginControlFlow("if(!$N.matches($N.$N()))", matcherField.getName(), actualParameter, matcherField.getGetterName())
+                    .beginControlFlow("if (!$N.matches($N.$N()))", matcherField.getName(), actualParameter, matcherField.getGetterName())
                     .addStatement("reportMismatch($S, $N, $N.$N(), $N, $N)", matcherField.getName(), matcherField.getName(), actualParameter, matcherField.getGetterName(), mismatchDescriptionParameter, matchesLocalField)
                     .addStatement("$N = false", matchesLocalField)
                     .endControlFlow()
@@ -149,6 +149,10 @@ public class MatcherField {
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName())
+                        .build();
+            } if(matcherField.getType() == double.class || matcherField.getType() == int.class) {
+                return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
+                        matcherField.getName(), expectedName, matcherField.getGetterName())
                         .build();
             } else {
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : is($N.$N())",

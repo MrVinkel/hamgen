@@ -13,11 +13,11 @@ public abstract class Logger {
         return logger;
     }
 
-    abstract void setLogLevel(LogLevel level);
-
     static void setLogger(Logger logger) {
         Logger.logger = logger;
     }
+
+    abstract void setLogLevel(LogLevel level);
 
     public abstract void debug(String message);
     public abstract void debug(String message, Throwable t);
@@ -31,7 +31,7 @@ public abstract class Logger {
     public abstract void error(String message);
     public abstract void error(String message, Throwable t);
 
-    enum LogLevel {
+    public enum LogLevel {
         DEBUG(0),
         INFO(1),
         WARN(2),

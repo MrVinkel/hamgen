@@ -19,6 +19,15 @@
             <artifactId>schemas</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>dk.martinvinkel</groupId>
+            <artifactId>hamgen-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -34,6 +43,10 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <packageName>dk.martinvinkel.hamgen.integrationtest.schemapackage</packageName>
+                            <outputDir>${project.build.directory}/generated-test-sources/hamgen</outputDir>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
@@ -43,6 +56,27 @@
                         <version>1.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+
+            <plugin>
+                <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>add-test-sources</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-test-sources/hamgen</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
