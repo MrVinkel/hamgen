@@ -21,8 +21,8 @@ public class MatcherBuilder {
     private String matcherPreFix = MATCHER_PRE_FIX.getDefaultValue();
 
     private MatcherBuilder(String originalPackageName, String originalClassName) {
-        this.originalPackageName = originalPackageName;
-        this.originalClassName = originalClassName;
+        this.originalPackageName = originalPackageName.trim();
+        this.originalClassName = originalClassName.trim();
     }
 
     public static MatcherBuilder matcherBuild(String packageName, String className) {
@@ -30,16 +30,20 @@ public class MatcherBuilder {
     }
 
     public MatcherBuilder withMatcherPrefix(String matcherPreFix) {
-        this.matcherPreFix = matcherPreFix;
+        this.matcherPreFix = matcherPreFix.trim();
         return this;
     }
 
     public MatcherBuilder withMatcherNamePostfix(String matcherNamePostFix) {
-        this.matcherNamePostFix = matcherNamePostFix;
+        this.matcherNamePostFix = matcherNamePostFix.trim();
         return this;
     }
 
     public MatcherBuilder withPackagePostFix(String packagePostFix) {
+        packagePostFix = packagePostFix.trim();
+        if(!packagePostFix.substring(0, 1).equals(".")) {
+            packagePostFix = "." + packagePostFix;
+        }
         this.packagePostFix = packagePostFix;
         return this;
     }
