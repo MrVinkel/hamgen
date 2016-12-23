@@ -120,7 +120,7 @@ public class MatcherBuilder {
                 .returns(TypeName.BOOLEAN)
                 .addParameter(itemParameter)
                 .addParameter(mismatchDescriptionParameter)
-                .addStatement("$T $N = false", matchesLocalField.type, matchesLocalField)
+                .addStatement("$T $N = true", matchesLocalField.type, matchesLocalField)
                 .addStatement("$T $N = ($T) $N", actualLocalParameter.type, actualLocalParameter, actualLocalParameter.type, itemParameter)
                 .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "{");
 
@@ -131,7 +131,7 @@ public class MatcherBuilder {
             FieldSpec field = matcherFieldBuilder.buildFieldSpec();
             matcherClassBuilder.addField(field);
 
-            CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name);
+            CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name, matcherPreFix);
             constructorBuilder.addCode(constructorBlock);
 
             CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualLocalParameter, mismatchDescriptionParameter, matchesLocalField);
@@ -162,6 +162,6 @@ public class MatcherBuilder {
     }
 
     private boolean isGetterMethod(Method method) {
-        return method.getName().toLowerCase().startsWith("get");
+        return method.getName().toLowerCase().startsWith("get") && !method.getName().equals("getClass");
     }
 }

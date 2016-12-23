@@ -4,7 +4,12 @@ import com.squareup.javapoet.*;
 import dk.martinvinkel.hamgen.util.StringUtil;
 import org.hamcrest.Matcher;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
+import static dk.martinvinkel.hamgen.util.ClassUtil.isPrimitiveWrapper;
+import static dk.martinvinkel.hamgen.util.StringUtil.capitalizeFirstLetter;
 import static javax.lang.model.element.Modifier.PROTECTED;
 
 public class MatcherField {
@@ -129,7 +134,7 @@ public class MatcherField {
                 descriptionTo.addStatement("$N.appendText($S)", descriptionParameter, ", ");
             }
 
-            return descriptionTo.addStatement("$N.appendText($S)", descriptionParameter, matcherField.getName() + " ")
+            return descriptionTo.addStatement("$N.appendText($S)", descriptionParameter, matcherField.getOrigName() + " ")
                     .addStatement("$N.appendDescriptionOf($N)", descriptionParameter, matcherField.getName())
                     .build();
         }
@@ -137,30 +142,35 @@ public class MatcherField {
         public CodeBlock buildMatchesSafely(ParameterSpec actualParameter, ParameterSpec mismatchDescriptionParameter, ParameterSpec matchesLocalField) {
             return CodeBlock.builder()
                     .beginControlFlow("if (!$N.matches($N.$N()))", matcherField.getName(), actualParameter, matcherField.getGetterName())
-                    .addStatement("reportMismatch($S, $N, $N.$N(), $N, $N)", matcherField.getName(), matcherField.getName(), actualParameter, matcherField.getGetterName(), mismatchDescriptionParameter, matchesLocalField)
+                    .addStatement("reportMismatch($S, $N, $N.$N(), $N, $N)", matcherField.getOrigName(), matcherField.getName(), actualParameter, matcherField.getGetterName(), mismatchDescriptionParameter, matchesLocalField)
                     .addStatement("$N = false", matchesLocalField)
                     .endControlFlow()
                     .build();
         }
 
-        public CodeBlock buildMatcherInitialization(String expectedName) {
+        public CodeBlock buildMatcherInitialization(String expectedName, String matcherPreFix) {
             if (matcherField.getType() == String.class) {
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName())
                         .build();
-            } if(matcherField.getType() == double.class || matcherField.getType() == int.class) {
+            }
+            if (matcherField.getType().isPrimitive() || isPrimitiveWrapper(matcherField.getType())) {
                 return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName())
                         .build();
             } else {
-                return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : is($N.$N())",
+                // Assume a matcher is generate for the type
+                String matcherFactoryName = matcherPreFix + capitalizeFirstLetter(matcherField.getOrigName());
+                return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : $N($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
-                        expectedName, matcherField.getGetterName())
+                        matcherFactoryName, expectedName, matcherField.getGetterName())
                         .build();
             }
         }
+
+
 
     }
 

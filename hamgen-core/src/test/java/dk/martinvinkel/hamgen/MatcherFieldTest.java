@@ -1,6 +1,7 @@
 package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.CodeBlock;
+import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.junit.Test;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
@@ -9,6 +10,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class MatcherFieldTest {
+
+    private static final String MATCHER_PRE_FIX = "is";
 
     @Test
     public void t0401_matcherField() {
@@ -88,7 +91,7 @@ public class MatcherFieldTest {
         matcherField.setType(String.class);
         MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
 
-        String expected = "desc.appendText(\"somethingMatch \");\n" +
+        String expected = "desc.appendText(\"something \");\n" +
                 "desc.appendDescriptionOf(somethingMatch);\n";
 
         //Act
@@ -109,7 +112,7 @@ public class MatcherFieldTest {
         MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
 
         String expected = "desc.appendText(\", \");\n" +
-                "desc.appendText(\"somethingMatch \");\n" +
+                "desc.appendText(\"something \");\n" +
                 "desc.appendDescriptionOf(somethingMatch);\n";
 
         //Act
@@ -132,14 +135,14 @@ public class MatcherFieldTest {
         String expected = "this.somethingMatch = expected.getSomething() == null || expected.getSomething().isEmpty() ? isEmptyOrNullString() : is(expected.getSomething());\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected");
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX);
 
         //Assert
         assertEquals(expected, result.toString());
     }
 
     @Test
-    public void t0407_buildMatcherInitializationOtherType() throws Exception {
+    public void t0407_buildMatcherInitializationSimpleTypes() throws Exception {
         //Arrange
         MatcherField matcherField = new MatcherField();
         matcherField.setName("something");
@@ -151,7 +154,26 @@ public class MatcherFieldTest {
         String expected = "this.somethingMatch = is(expected.getSomething());\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected");
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX);
+
+        //Assert
+        assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void t0408_buildMatcherInitializationOtherTypes() throws Exception {
+        //Arrange
+        MatcherField matcherField = new MatcherField();
+        matcherField.setName("somethingElse");
+        matcherField.setGetterName("getSomethingElse");
+        matcherField.setFieldPostFix("Match");
+        matcherField.setType(MatcherBuilderTestDataSomethingElse.class);
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+
+        String expected = "this.somethingElseMatch = expected.getSomethingElse() == null ? nullValue() : isSomethingElse(expected.getSomethingElse());\n";
+
+        //Act
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX);
 
         //Assert
         assertEquals(expected, result.toString());

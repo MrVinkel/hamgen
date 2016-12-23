@@ -3,8 +3,7 @@ package dk.martinvinkel.hamgen.testdata;
 /**
  * DO NOT CHANGE THIS CLASS! it will brake MatcherBuildTest
  */
-public final class MatcherBuilderTestData {
-
+public final class MatcherBuilderTestDataSomethingElse {
     public String getMyField() {
         return "getMyField";
     }
