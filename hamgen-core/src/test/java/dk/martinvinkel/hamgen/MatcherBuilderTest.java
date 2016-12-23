@@ -1,11 +1,22 @@
 package dk.martinvinkel.hamgen;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 
 public class MatcherBuilderTest {
@@ -129,13 +140,16 @@ public class MatcherBuilderTest {
         // Arrange
         String expected =
                 "public class MatcherBuilderTestDataSomethingElseMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
-                        "  protected org.hamcrest.Matcher myFieldMatcher;\n" +
+                        "  protected org.hamcrest.Matcher myEnumMatcher;\n" +
                         "\n" +
                         "  protected org.hamcrest.Matcher mySecondFieldMatcher;\n" +
                         "\n" +
+                        "  protected org.hamcrest.Matcher myFieldMatcher;\n" +
+                        "\n" +
                         "  public MatcherBuilderTestDataSomethingElseMatcher(com.test.MatcherBuilderTestDataSomethingElse expected) {\n" +
-                        "    this.myFieldMatcher = expected.getMyField() == null || expected.getMyField().isEmpty() ? isEmptyOrNullString() : is(expected.getMyField());\n" +
+                        "    this.myEnumMatcher = is(expected.getMyEnum());\n" +
                         "    this.mySecondFieldMatcher = is(expected.getMySecondField());\n" +
+                        "    this.myFieldMatcher = expected.getMyField() == null || expected.getMyField().isEmpty() ? isEmptyOrNullString() : is(expected.getMyField());\n" +
                         "  }\n" +
                         "\n" +
                         "  @java.lang.Override\n" +
@@ -143,12 +157,16 @@ public class MatcherBuilderTest {
                         "    boolean matches = true;\n" +
                         "    com.test.MatcherBuilderTestDataSomethingElse actual = (com.test.MatcherBuilderTestDataSomethingElse) item;\n" +
                         "    mismatchDesc.appendText(\"{\");\n" +
-                        "    if (!myFieldMatcher.matches(actual.getMyField())) {\n" +
-                        "      reportMismatch(\"myField\", myFieldMatcher, actual.getMyField(), mismatchDesc, matches);\n" +
+                        "    if (!myEnumMatcher.matches(actual.getMyEnum())) {\n" +
+                        "      reportMismatch(\"myEnum\", myEnumMatcher, actual.getMyEnum(), mismatchDesc, matches);\n" +
                         "      matches = false;\n" +
                         "    }\n" +
                         "    if (!mySecondFieldMatcher.matches(actual.getMySecondField())) {\n" +
                         "      reportMismatch(\"mySecondField\", mySecondFieldMatcher, actual.getMySecondField(), mismatchDesc, matches);\n" +
+                        "      matches = false;\n" +
+                        "    }\n" +
+                        "    if (!myFieldMatcher.matches(actual.getMyField())) {\n" +
+                        "      reportMismatch(\"myField\", myFieldMatcher, actual.getMyField(), mismatchDesc, matches);\n" +
                         "      matches = false;\n" +
                         "    }\n" +
                         "    mismatchDesc.appendText(\"}\");\n" +
@@ -158,11 +176,14 @@ public class MatcherBuilderTest {
                         "  @java.lang.Override\n" +
                         "  public void describeTo(org.hamcrest.Description desc) {\n" +
                         "    desc.appendText(\"{\");\n" + "" +
-                        "    desc.appendText(\"myField \");\n" +
-                        "    desc.appendDescriptionOf(myFieldMatcher);\n" +
+                        "    desc.appendText(\"myEnum \");\n" +
+                        "    desc.appendDescriptionOf(myEnumMatcher);\n" +
                         "    desc.appendText(\", \");\n" +
                         "    desc.appendText(\"mySecondField \");\n" +
                         "    desc.appendDescriptionOf(mySecondFieldMatcher);\n" +
+                        "    desc.appendText(\", \");\n" +
+                        "    desc.appendText(\"myField \");\n" +
+                        "    desc.appendDescriptionOf(myFieldMatcher);\n" +
                         "    desc.appendText(\"}\");\n" +
                         "  }\n" +
                         "\n" +
@@ -172,13 +193,23 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "}\n";
 
+        SimpleEntry<ClassName, String> expectedStaticImport = new SimpleEntry<>(ClassName.get(Matchers.class), "*");
+
         // Act
-        TypeSpec result = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestDataSomethingElse")
-                .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethods())
-                .build();
+        //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
+        MatcherBuilder matcherBuilder = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestDataSomethingElse")
+                .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethod("myRandomFunction"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getMyEnum"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getMySecondField"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getMyField"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getClass"));
+        TypeSpec result = matcherBuilder.build();
+
+        Map<ClassName, String> staticImportsResult = matcherBuilder.buildStaticImports();
 
         // Assert
         assertEquals(expected, result.toString());
+        assertThat(staticImportsResult.entrySet(), allOf(hasSize(1), (Matcher)hasItem(expectedStaticImport)));
     }
 
 }

@@ -3,6 +3,7 @@ package dk.martinvinkel.hamgen;
 import com.squareup.javapoet.*;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
+import org.hamcrest.Matchers;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -29,10 +30,12 @@ public class MatcherBuilder {
     private String packagePostFix = PACKAGE_POST_FIX.getDefaultValue();
     private String matcherPreFix = MATCHER_PRE_FIX.getDefaultValue();
     private List<MatcherField> matcherFields = new ArrayList<>();
+    private Map<ClassName, String> staticImports = new HashMap<>();
 
     private MatcherBuilder(String originalPackageName, String originalClassName) {
         this.originalPackageName = originalPackageName.trim();
         this.originalClassName = originalClassName.trim();
+        this.staticImports.put(ClassName.get(Matchers.class), "*");
     }
 
     public static MatcherBuilder matcherBuild(String packageName, String className) {
@@ -131,7 +134,7 @@ public class MatcherBuilder {
             FieldSpec field = matcherFieldBuilder.buildFieldSpec();
             matcherClassBuilder.addField(field);
 
-            CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name, matcherPreFix);
+            CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name, matcherPreFix, packagePostFix);
             constructorBuilder.addCode(constructorBlock);
 
             CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualLocalParameter, mismatchDescriptionParameter, matchesLocalField);
@@ -140,6 +143,7 @@ public class MatcherBuilder {
             CodeBlock descriptionBlock = matcherFieldBuilder.buildDescriptionTo(firstField, descriptionParameter.name);
             descriptionToBuilder.addCode(descriptionBlock);
 
+            this.staticImports.putAll(matcherFieldBuilder.buildStaticImports());
             firstField = false;
         }
 
@@ -159,6 +163,10 @@ public class MatcherBuilder {
         matcherClassBuilder.addMethod(descriptionToMethod);
         matcherClassBuilder.addMethod(factoryMethod);
         return matcherClassBuilder.build();
+    }
+
+    public Map<ClassName, String> buildStaticImports() {
+        return staticImports;
     }
 
     private boolean isGetterMethod(Method method) {

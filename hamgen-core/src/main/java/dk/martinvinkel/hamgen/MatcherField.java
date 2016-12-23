@@ -76,6 +76,7 @@ public class MatcherField {
 
     public static class Builder {
         private MatcherField matcherField = new MatcherField();
+        private Map<ClassName, String> staticImports = new HashMap<>();
 
         private Builder(Class<?> type, String getterName) {
             withType(type);
@@ -148,21 +149,22 @@ public class MatcherField {
                     .build();
         }
 
-        public CodeBlock buildMatcherInitialization(String expectedName, String matcherPreFix) {
+        public CodeBlock buildMatcherInitialization(String expectedName, String matcherPreFix, String packagePostFix) {
             if (matcherField.getType() == String.class) {
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName())
                         .build();
-            }
-            if (matcherField.getType().isPrimitive() || isPrimitiveWrapper(matcherField.getType())) {
+            } else if (matcherField.getType().isPrimitive() || isPrimitiveWrapper(matcherField.getType()) || matcherField.getType().isEnum()) {
                 return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName())
                         .build();
             } else {
-                // Assume a matcher is generate for the type
+                // Assume a matcher is generated for the type
                 String matcherFactoryName = matcherPreFix + capitalizeFirstLetter(matcherField.getOrigName());
+                ClassName matcherClass = ClassName.get(matcherField.getType().getPackage().getName() + packagePostFix, matcherField.getType().getSimpleName() + matcherField.getFieldPostFix());
+                staticImports.put(matcherClass, matcherFactoryName);
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : $N($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         matcherFactoryName, expectedName, matcherField.getGetterName())
@@ -170,7 +172,9 @@ public class MatcherField {
             }
         }
 
-
+        public Map<ClassName, String> buildStaticImports() {
+            return staticImports;
+        }
 
     }
 

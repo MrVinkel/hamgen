@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.*;
+import static dk.martinvinkel.hamgen.util.ClassUtil.isPrimitiveWrapper;
 
 public class HamcrestGenerator {
     private static final Logger LOGGER = Logger.getLogger();
@@ -32,14 +33,18 @@ public class HamcrestGenerator {
         checkClasses(annotatedClasses);
 
         for (Class<?> clazz : annotatedClasses) {
+            if(clazz.isEnum() || clazz.isPrimitive() || isPrimitiveWrapper(clazz)) {
+                LOGGER.debug("Skipping enum/primitive/primitiveWrapper class");
+                continue;
+            }
+
             LOGGER.info("Building matcher for " + clazz.getName());
-            TypeSpec matcherClass = MatcherBuilder.matcherBuild(clazz.getPackage().getName(), clazz.getSimpleName())
+            MatcherBuilder matcherClassBuilder = MatcherBuilder.matcherBuild(clazz.getPackage().getName(), clazz.getSimpleName())
                     .withMatcherPrefix(properties.getProperty(MATCHER_PRE_FIX))
                     .withMatcherNamePostfix(properties.getProperty(MATCHER_POST_FIX))
                     .withPackagePostFix(properties.getProperty(PACKAGE_POST_FIX))
-                    .matchFields(clazz.getMethods())
-                    .build();
-            writeFile(clazz.getPackage().getName(), matcherClass, outputDir);
+                    .matchFields(clazz.getMethods());
+            writeFile(clazz.getPackage().getName(), matcherClassBuilder, outputDir);
         }
 
         LOGGER.info("Done!");
@@ -64,12 +69,14 @@ public class HamcrestGenerator {
         return outputDir;
     }
 
-    private void writeFile(String packageName, TypeSpec matcherClass, File outputDir) throws IOException {
+    private void writeFile(String packageName, MatcherBuilder matcherClassBuilder, File outputDir) throws IOException {
+        TypeSpec matcherClass = matcherClassBuilder.build();
+        JavaFile.Builder fileBuilder = JavaFile.builder(packageName + properties.getProperty(PACKAGE_POST_FIX), matcherClass).indent("    ");
+        for(Map.Entry<ClassName, String> staticImport : matcherClassBuilder.buildStaticImports().entrySet()) {
+            fileBuilder.addStaticImport(staticImport.getKey(), staticImport.getValue());
+        }
         LOGGER.debug("Writing file " + matcherClass.name + " to " + outputDir.getAbsolutePath());
-        JavaFile file = JavaFile.builder(packageName + properties.getProperty(PACKAGE_POST_FIX), matcherClass)
-                .addStaticImport(Matchers.class, "*")
-                .indent("    ")
-                .build();
+        JavaFile file = fileBuilder.build();
         file.writeTo(outputDir);
     }
 
