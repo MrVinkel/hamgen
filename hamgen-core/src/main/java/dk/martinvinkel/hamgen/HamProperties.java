@@ -42,7 +42,7 @@ public class HamProperties extends Properties {
         PACKAGE_NAME("packagename", null),
         FAIL_ON_NO_CLASSES_FOUND("failOnNoClasses", "true"),
         PACKAGE_POST_FIX("packagepostfix", ".matcher"),
-        MATCHER_PRE_FIX("matcherprefix", "Is"),
+        MATCHER_PRE_FIX("matcherprefix", "is"),
         MATCHER_POST_FIX("matcherpostfix", "Matcher"),
         ;
 

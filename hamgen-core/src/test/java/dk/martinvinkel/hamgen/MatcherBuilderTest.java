@@ -34,7 +34,7 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "\n" +
                         "  @org.hamcrest.Factory\n" +
-                        "  public static com.test.matcher.TestClassMatcher IsTestClass(com.test.TestClass expected) {\n" +
+                        "  public static com.test.matcher.TestClassMatcher isTestClass(com.test.TestClass expected) {\n" +
                         "    return new com.test.matcher.TestClassMatcher(expected);\n" +
                         "  }\n" +
                         "}\n";
@@ -167,7 +167,7 @@ public class MatcherBuilderTest {
                         "  }\n" +
                         "\n" +
                         "  @org.hamcrest.Factory\n" +
-                        "  public static com.test.matcher.MatcherBuilderTestDataMatcher IsMatcherBuilderTestData(com.test.MatcherBuilderTestData expected) {\n" +
+                        "  public static com.test.matcher.MatcherBuilderTestDataMatcher isMatcherBuilderTestData(com.test.MatcherBuilderTestData expected) {\n" +
                         "    return new com.test.matcher.MatcherBuilderTestDataMatcher(expected);\n" +
                         "  }\n" +
                         "}\n";
