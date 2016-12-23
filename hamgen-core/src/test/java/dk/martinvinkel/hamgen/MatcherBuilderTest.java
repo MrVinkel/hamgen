@@ -197,6 +197,7 @@ public class MatcherBuilderTest {
 
         // Act
         //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
+        //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
         MatcherBuilder matcherBuilder = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestDataSomethingElse")
                 .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethod("myRandomFunction"),
                         MatcherBuilderTestDataSomethingElse.class.getMethod("getMyEnum"),

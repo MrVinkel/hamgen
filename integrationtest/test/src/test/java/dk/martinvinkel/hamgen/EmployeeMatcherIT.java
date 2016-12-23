@@ -2,6 +2,7 @@ package dk.martinvinkel.hamgen;
 
 import dk.martinvinkel.hamgen.integrationtest.schemapackage.Address;
 import dk.martinvinkel.hamgen.integrationtest.schemapackage.Employee;
+import dk.martinvinkel.hamgen.integrationtest.schemapackage.Status;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
@@ -9,6 +10,8 @@ import org.junit.Test;
 
 import static dk.martinvinkel.hamgen.builder.AddressBuilder.aDefaultAddress;
 import static dk.martinvinkel.hamgen.builder.EmployeeBuilder.aDefaultEmployee;
+import static dk.martinvinkel.hamgen.integrationtest.schemapackage.Status.FIRED;
+import static dk.martinvinkel.hamgen.integrationtest.schemapackage.Status.HIRED;
 import static dk.martinvinkel.hamgen.integrationtest.schemapackage.matcher.EmployeeMatcher.isEmployee;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -78,13 +81,30 @@ public class EmployeeMatcherIT {
     }
 
     @Test
-    public void t1102_describeMismatchNested() throws Exception {
+    public void t1103_describeMismatchNested() throws Exception {
         //Arrange
         Employee expected = aDefaultEmployee().build();
         Address address = aDefaultAddress().withCityName("London").build();
         Employee actual = aDefaultEmployee().withAddress(address).build();
 
         String expectedDescription = "{address {cityName was \"London\"}}";
+
+        //Act
+        Matcher employeeMatcher = isEmployee(expected);
+        StringDescription mismatchDescription = new StringDescription();
+        employeeMatcher.describeMismatch(actual, mismatchDescription);
+
+        //Assert
+        assertEquals(expectedDescription, mismatchDescription.toString());
+    }
+
+    @Test
+    public void t1104_describeMismatchEnum() throws Exception {
+        //Arrange
+        Employee expected = aDefaultEmployee().withStatus(HIRED).build();
+        Employee actual = aDefaultEmployee().withStatus(FIRED).build();
+
+        String expectedDescription = "{status was <FIRED>}";
 
         //Act
         Matcher employeeMatcher = isEmployee(expected);

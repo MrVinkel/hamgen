@@ -24,21 +24,21 @@ public class MatcherFieldMatcher extends HamGenDiagnosingMatcher {
     @Override
     protected boolean matchesSafely(Object item, Description mismatchDesc) {
         boolean matches = true;
-        MatcherField actual = (MatcherField)item;
+        MatcherField actual = (MatcherField) item;
         mismatchDesc.appendText("{");
-        if(!nameMatcher.matches(actual.getName())) {
+        if (!nameMatcher.matches(actual.getName())) {
             reportMismatch("name", nameMatcher, actual.getName(), mismatchDesc, matches);
             matches = false;
         }
-        if(!getterNameMatcher.matches(actual.getGetterName())) {
+        if (!getterNameMatcher.matches(actual.getGetterName())) {
             reportMismatch("getterName", getterNameMatcher, actual.getGetterName(), mismatchDesc, matches);
             matches = false;
         }
-        if(!postFixMatcher.matches(actual.getFieldPostFix())) {
+        if (!postFixMatcher.matches(actual.getFieldPostFix())) {
             reportMismatch("fieldPostFix", postFixMatcher, actual.getFieldPostFix(), mismatchDesc, matches);
             matches = false;
         }
-        if(!typeMatcher.matches(actual.getType())) {
+        if (!typeMatcher.matches(actual.getType())) {
             reportMismatch("type", typeMatcher, actual.getType(), mismatchDesc, matches);
             matches = false;
         }
