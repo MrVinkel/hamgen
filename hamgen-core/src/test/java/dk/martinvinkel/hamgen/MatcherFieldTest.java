@@ -2,7 +2,6 @@ package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataMyEnum;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.hamcrest.Matcher;
@@ -23,6 +22,7 @@ public class MatcherFieldTest {
 
     private static final String MATCHER_PRE_FIX = HamProperties.Key.MATCHER_PRE_FIX.getDefaultValue();
     private static final String PACKAGE_POST_FIX = HamProperties.Key.PACKAGE_POST_FIX.getDefaultValue();
+    private static final String PARAM_NAME_EXPECTED = "expected";
 
     @Test
     public void t0401_matcherField() {
@@ -146,7 +146,7 @@ public class MatcherFieldTest {
         String expected = "this.somethingMatch = expected.getSomething() == null || expected.getSomething().isEmpty() ? isEmptyOrNullString() : is(expected.getSomething());\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
         assertEquals(expected, result.toString());
@@ -165,7 +165,7 @@ public class MatcherFieldTest {
         String expected = "this.somethingMatch = is(expected.getSomething());\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
         assertEquals(expected, result.toString());
@@ -184,7 +184,7 @@ public class MatcherFieldTest {
         String expected = "this.somethingElseMatch = expected.getSomethingElse() == null ? nullValue() : isSomethingElse(expected.getSomethingElse());\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
         assertEquals(expected, result.toString());
@@ -205,7 +205,7 @@ public class MatcherFieldTest {
         SimpleEntry<ClassName, String> expected = new SimpleEntry<>(matcherTypeName, "isSomethingElse");
 
         //Act
-        matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
         Map<ClassName, String> result = matcherFieldBuilder.buildStaticImports();
 
         //Assert
@@ -225,7 +225,7 @@ public class MatcherFieldTest {
         String expected = "this.myEnumMatch = is(expected.getMyEnum());\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization("expected", MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
         assertEquals(expected, result.toString());
