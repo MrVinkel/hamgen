@@ -18,7 +18,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
 <dependency>
     <groupId>org.hamgen</groupId>
     <artifactId>hamgen-core</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 </dependency>
 <dependency>
     <groupId>org.hamcrest</groupId>
@@ -29,7 +29,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
 <plugin>
     <groupId>org.hamgen</groupId>
     <artifactId>hamgen-maven-plugin</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <executions>
         <execution>
             <id>generate-matchers</id>
@@ -146,13 +146,13 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 ## Changelog
 -----------
 
+* 1.1 POJO matchers - Generate Hamcrest matchers for any POJO with getter methods
 * 1.0 Initial - Generate Hamcrest matchers for JAXB classes
 
 ## TODO
 -----------
 
-* Support for matching collections exact and lax
-* Support for generating matchers for any POJO model class
+* Support for matching collection lax
 * Verification of all nested matchers are generated
 
 ## License

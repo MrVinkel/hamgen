@@ -6,23 +6,23 @@
     <parent>
         <groupId>org.hamgen</groupId>
         <artifactId>integrationtest</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
     </parent>
 
     <groupId>org.hamgen.integrationtest</groupId>
     <artifactId>matchers</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 
     <dependencies>
         <dependency>
             <groupId>org.hamgen.integrationtest</groupId>
             <artifactId>schemas</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>org.hamgen</groupId>
             <artifactId>hamgen-core</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -35,7 +35,7 @@
             <plugin>
                 <groupId>org.hamgen</groupId>
                 <artifactId>hamgen-maven-plugin</artifactId>
-                <version>1.0</version>
+                <version>1.1</version>
                 <executions>
                     <execution>
                         <id>generate-jaxb-matchers</id>
@@ -54,7 +54,7 @@
                     <dependency>
                         <groupId>org.hamgen.integrationtest</groupId>
                         <artifactId>schemas</artifactId>
-                        <version>1.0</version>
+                        <version>1.1</version>
                     </dependency>
                 </dependencies>
             </plugin>
