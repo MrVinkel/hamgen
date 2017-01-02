@@ -2,6 +2,7 @@ package dk.martinvinkel.hamgen;
 
 import dk.martinvinkel.hamgen.integrationtest.schemapackage.Address;
 import dk.martinvinkel.hamgen.integrationtest.schemapackage.Employee;
+import dk.martinvinkel.hamgen.integrationtest.schemapackage.PersonNameStruct;
 import dk.martinvinkel.hamgen.integrationtest.schemapackage.Status;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -13,6 +14,8 @@ import static dk.martinvinkel.hamgen.builder.EmployeeBuilder.aDefaultEmployee;
 import static dk.martinvinkel.hamgen.integrationtest.schemapackage.Status.FIRED;
 import static dk.martinvinkel.hamgen.integrationtest.schemapackage.Status.HIRED;
 import static dk.martinvinkel.hamgen.integrationtest.schemapackage.matcher.EmployeeMatcher.isEmployee;
+import static dk.martinvinkel.hamgen.integrationtest.schemapackage.matcher.PersonNameStructMatcher.isPersonNameStruct;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -124,6 +127,29 @@ public class EmployeeMatcherIT {
                 .appendText("\n     but: ");
         matcher.describeMismatch(actual, description);
         return description;
+    }
+
+    @Test
+    public void testGetAPerson() throws Exception {
+        //Arrange
+        PersonNameStruct expected = new PersonNameStruct();
+        expected.setFirstName("John");
+        expected.setMiddleName("Poul");
+        expected.setLastName("Einstein");
+
+        //Act
+        PersonNameStruct actual = getAPerson();
+
+        //Assert
+        assertThat(actual, isPersonNameStruct(expected));
+    }
+
+    private PersonNameStruct getAPerson() {
+        PersonNameStruct expected = new PersonNameStruct();
+        expected.setFirstName("John");
+        expected.setMiddleName("Huggo");
+        expected.setLastName("Einstein");
+        return expected;
     }
 
 }
