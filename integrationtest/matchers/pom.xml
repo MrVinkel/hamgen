@@ -38,7 +38,7 @@
                 <version>1.0</version>
                 <executions>
                     <execution>
-                        <id>generate</id>
+                        <id>generate-jaxb-matchers</id>
                         <phase>generate-test-sources</phase>
                         <goals>
                             <goal>generate</goal>
@@ -46,6 +46,7 @@
                         <configuration>
                             <packageName>dk.martinvinkel.hamgen.integrationtest.schemapackage</packageName>
                             <outputDir>${project.build.directory}/generated-test-sources/hamgen</outputDir>
+                            <annotation>javax.xml.bind.annotation.XmlType</annotation>
                         </configuration>
                     </execution>
                 </executions>

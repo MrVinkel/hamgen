@@ -6,6 +6,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.FAIL_ON_NO_CLASSES_FOUND;
 import static dk.martinvinkel.hamgen.HamProperties.Key.PACKAGE_NAME;
@@ -30,12 +31,11 @@ public class HamcrestGeneratorTest {
         //Arrange
         HamProperties properties = new HamProperties();
         properties.setProperty(FAIL_ON_NO_CLASSES_FOUND, "true");
-        properties.setProperty(PACKAGE_NAME, "com.potato.tomato.fisk.ost");
         HamcrestGenerator hamcrestGenerator = new HamcrestGenerator(properties);
 
         //Act
         try {
-            hamcrestGenerator.generateMatchers();
+            hamcrestGenerator.generateMatchers(Collections.<Class<?>>emptyList());
             fail();
         } catch (Exception e) {
             //Assert
@@ -51,13 +51,12 @@ public class HamcrestGeneratorTest {
 
         HamProperties properties = new HamProperties();
         properties.setProperty(FAIL_ON_NO_CLASSES_FOUND, "false");
-        properties.setProperty(PACKAGE_NAME, "com.potato.tomato.fisk.ost");
         HamcrestGenerator hamcrestGenerator = new HamcrestGenerator(properties);
 
         SimpleEntry<LogLevel, String> expected = new SimpleEntry<>(WARN, "No classes found!");
 
         //Act
-        hamcrestGenerator.generateMatchers();
+        hamcrestGenerator.generateMatchers(Collections.<Class<?>>emptyList());
 
         //Assert
         assertThat(BufferLogger.getLog(), hasItem(is(expected)));

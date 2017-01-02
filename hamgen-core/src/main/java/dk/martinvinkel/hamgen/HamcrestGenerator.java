@@ -22,19 +22,15 @@ public class HamcrestGenerator {
         this.properties = properties;
     }
 
-    public void generateMatchers() throws IOException {
+    public void generateMatchers(Collection<Class<?>> classes) throws IOException {
         LOGGER.info("Generating matchers..");
-
         File outputDir = createOutputDir();
 
-        Reflections reflections = new Reflections(properties.getProperty(PACKAGE_NAME));
-        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(XmlType.class);
+        checkClasses(classes);
 
-        checkClasses(annotatedClasses);
-
-        for (Class<?> clazz : annotatedClasses) {
+        for (Class<?> clazz : classes) {
             if(clazz.isEnum() || clazz.isPrimitive() || isPrimitiveWrapper(clazz)) {
-                LOGGER.debug("Skipping enum/primitive/primitiveWrapper class");
+                LOGGER.info("Skipping enum/primitive/primitiveWrapper class <" + clazz.getName() + ">");
                 continue;
             }
 
@@ -44,21 +40,22 @@ public class HamcrestGenerator {
                     .withMatcherNamePostfix(properties.getProperty(MATCHER_POST_FIX))
                     .withPackagePostFix(properties.getProperty(PACKAGE_POST_FIX))
                     .matchFields(clazz.getMethods());
+            // todo check if all needed matchers are generated for nesting
             writeFile(clazz.getPackage().getName(), matcherClassBuilder, outputDir);
         }
 
         LOGGER.info("Done!");
     }
 
-    private void checkClasses(Set<Class<?>> annotatedClasses) {
+    private void checkClasses(Collection<Class<?>> classes) {
         boolean failOnNoClasses = Boolean.parseBoolean(properties.getProperty(FAIL_ON_NO_CLASSES_FOUND));
-        if(annotatedClasses.size() == 0) {
+        if(classes.size() == 0) {
             if(failOnNoClasses) {
                 throw new IllegalStateException("No classes found!");
             }
             LOGGER.warn("No classes found!");
         } else {
-            LOGGER.debug("Found " + annotatedClasses.size() + " classes");
+            LOGGER.debug("Found " + classes.size() + " classes");
         }
     }
 

@@ -1,5 +1,6 @@
 package dk.martinvinkel.hamgen;
 
+import javax.xml.bind.annotation.XmlType;
 import java.util.Properties;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.toKey;
@@ -40,6 +41,7 @@ public class HamProperties extends Properties {
     public enum Key {
         OUTPUT_DIR("outputdir", "target/generate-sources"),
         PACKAGE_NAME("packagename", null),
+        ANNOTATION("annotation", null),
         FAIL_ON_NO_CLASSES_FOUND("failOnNoClasses", "true"),
         PACKAGE_POST_FIX("packagepostfix", ".matcher"),
         MATCHER_PRE_FIX("matcherprefix", "is"),

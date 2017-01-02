@@ -7,7 +7,6 @@ import org.hamcrest.Matcher;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
@@ -160,6 +159,7 @@ public class MatcherField {
                     .build();
         }
 
+        // todo refactor this mess
         public CodeBlock buildMatcherInitialization(String expectedName, String matcherPreFix, String packagePostFix) {
             LOGGER.debug(matcherField.getType().toString());
             if (matcherField.getType() == String.class) {
@@ -173,31 +173,7 @@ public class MatcherField {
                         matcherField.getName(), expectedName, matcherField.getGetterName())
                         .build();
             } else if(Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
-                CodeBlock.Builder builder = CodeBlock.builder();
-
-                ParameterizedType parameterizedType = (ParameterizedType) matcherField.getType();
-                Type collectionType = parameterizedType.getActualTypeArguments()[0];
-                Class<?> collectionClass = (Class<?>) collectionType;
-
-                builder.addStatement("$T<$T> items = expected.$N()", List.class, collectionClass, matcherField.getGetterName());
-                builder.beginControlFlow("if (items == null)");
-                builder.addStatement("this.$N = nullValue()", matcherField.getName());
-                builder.nextControlFlow("else");
-                builder.addStatement("$T<$T> matchers = new $T<>()", List.class, Matcher.class, ArrayList.class);
-                builder.beginControlFlow("for ($T item : items)", collectionClass);
-                if(collectionType == String.class) {
-                    builder.addStatement("$T matcher = item == null ||item.isEmpty() ? isEmptyOrNullString() : is(item)", Matcher.class);
-                } else if(collectionClass.isPrimitive() || isPrimitiveWrapper(collectionClass) || collectionClass.isEnum()) {
-                    builder.addStatement("$T matcher = is(item)", Matcher.class);
-                } else {
-                    addStaticImport(packagePostFix, matcherPreFix, collectionClass);
-                    builder.addStatement("$T matcher = item == null ? nullValue() : is$N(item)", Matcher.class, collectionClass.getSimpleName());
-                }
-                builder.addStatement("matchers.add(matcher)");
-                builder.endControlFlow();
-                builder.addStatement("this.$N = contains(matchers.toArray(new $T[matchers.size()]))", matcherField.getName(), Matcher.class);
-                builder.endControlFlow();
-                return builder.build();
+                return buildCollectionMatcher(matcherPreFix, packagePostFix);
             } else {
                 // Assume a matcher is generated for the type
                 String matcherFactoryName = matcherPreFix + capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
@@ -207,6 +183,34 @@ public class MatcherField {
                         matcherFactoryName, expectedName, matcherField.getGetterName())
                         .build();
             }
+        }
+
+        private CodeBlock buildCollectionMatcher(String matcherPreFix, String packagePostFix) {
+            CodeBlock.Builder builder = CodeBlock.builder();
+
+            ParameterizedType parameterizedType = (ParameterizedType) matcherField.getType();
+            Type collectionType = parameterizedType.getActualTypeArguments()[0];
+            Class<?> collectionClass = (Class<?>) collectionType;
+
+            builder.addStatement("$T<$T> items = expected.$N()", List.class, collectionClass, matcherField.getGetterName());
+            builder.beginControlFlow("if (items == null)");
+            builder.addStatement("this.$N = nullValue()", matcherField.getName());
+            builder.nextControlFlow("else");
+            builder.addStatement("$T<$T> matchers = new $T<>()", List.class, Matcher.class, ArrayList.class);
+            builder.beginControlFlow("for ($T item : items)", collectionClass);
+            if(collectionType == String.class) {
+                builder.addStatement("$T matcher = item == null ||item.isEmpty() ? isEmptyOrNullString() : is(item)", Matcher.class);
+            } else if(collectionClass.isPrimitive() || isPrimitiveWrapper(collectionClass) || collectionClass.isEnum()) {
+                builder.addStatement("$T matcher = is(item)", Matcher.class);
+            } else {
+                addStaticImport(packagePostFix, matcherPreFix, collectionClass);
+                builder.addStatement("$T matcher = item == null ? nullValue() : is$N(item)", Matcher.class, collectionClass.getSimpleName());
+            }
+            builder.addStatement("matchers.add(matcher)");
+            builder.endControlFlow();
+            builder.addStatement("this.$N = contains(matchers.toArray(new $T[matchers.size()]))", matcherField.getName(), Matcher.class);
+            builder.endControlFlow();
+            return builder.build();
         }
 
         private void addStaticImport(String packagePostFix, String matcherPreFix, Class clazz) {

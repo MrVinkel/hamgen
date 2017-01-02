@@ -2,6 +2,7 @@ package dk.martinvinkel.hamgen.builder;
 
 import com.squareup.javapoet.*;
 import dk.martinvinkel.hamgen.HamGenDiagnosingMatcher;
+import dk.martinvinkel.hamgen.log.Logger;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matchers;
@@ -18,6 +19,8 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 public class MatcherBuilder {
+    private static final Logger LOGGER = Logger.getLogger();
+
     private static final String PARAM_NAME_EXPECTED = "expected";
     private static final String PARAM_NAME_DESCRIPTION = "desc";
     private static final String PARAM_NAME_ACTUAL_ITEM = "item";
@@ -65,6 +68,7 @@ public class MatcherBuilder {
 
     public MatcherBuilder matchField(Method getterMethod) {
         if (!isGetterMethod(getterMethod)) {
+            LOGGER.debug("Not a getter method: " + getterMethod.getName());
             return this;
         }
 
