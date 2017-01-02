@@ -6,18 +6,18 @@
     <parent>
         <groupId>dk.martinvinkel</groupId>
         <artifactId>integrationtest</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
 
     <groupId>dk.martinvinkel.integrationtest</groupId>
     <artifactId>test</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <dependencies>
         <dependency>
             <groupId>dk.martinvinkel.integrationtest</groupId>
             <artifactId>matchers</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
