@@ -1,13 +1,17 @@
-package dk.martinvinkel.hamgen;
+package dk.martinvinkel.hamgen.builder;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import dk.martinvinkel.hamgen.HamProperties;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataMyEnum;
+import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomething;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
@@ -181,7 +185,7 @@ public class MatcherFieldTest {
         matcherField.setType(MatcherBuilderTestDataSomethingElse.class);
         MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
 
-        String expected = "this.somethingElseMatch = expected.getSomethingElse() == null ? nullValue() : isSomethingElse(expected.getSomethingElse());\n";
+        String expected = "this.somethingElseMatch = expected.getSomethingElse() == null ? nullValue() : isMatcherBuilderTestDataSomethingElse(expected.getSomethingElse());\n";
 
         //Act
         CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
@@ -202,14 +206,14 @@ public class MatcherFieldTest {
 
 
         ClassName matcherTypeName = ClassName.get("dk.martinvinkel.hamgen.testdata.matcher", "MatcherBuilderTestDataSomethingElseMatch");
-        SimpleEntry<ClassName, String> expected = new SimpleEntry<>(matcherTypeName, "isSomethingElse");
+        SimpleEntry<ClassName, String> expected = new SimpleEntry<>(matcherTypeName, "isMatcherBuilderTestDataSomethingElse");
 
         //Act
         matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
         Map<ClassName, String> result = matcherFieldBuilder.buildStaticImports();
 
         //Assert
-        assertThat(result.entrySet(), allOf((Matcher)hasItem(expected), hasSize(1)));
+        assertThat(result.entrySet(), allOf((Matcher) hasItem(expected), hasSize(1)));
     }
 
     @Test
@@ -229,6 +233,105 @@ public class MatcherFieldTest {
 
         //Assert
         assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void t0411_buildMatcherListString() throws Exception {
+        //Arrange
+        MatcherField matcherField = new MatcherField();
+        matcherField.setName("myList");
+        matcherField.setGetterName("getMyList");
+        matcherField.setType(this.getClass().getMethod("getList").getGenericReturnType());
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+
+        String expected = "java.util.List<java.lang.String> items = expected.getMyList();\n" +
+                "if (items == null) {\n" +
+                "  this.myListMatcher = nullValue();\n" +
+                "} else {\n" +
+                "  java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
+                "  for (java.lang.String item : items) {\n" +
+                "    org.hamcrest.Matcher matcher = item == null ||item.isEmpty() ? isEmptyOrNullString() : is(item);\n" +
+                "    matchers.add(matcher);\n" +
+                "  }\n" +
+                "  this.myListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
+                "}\n";
+
+        //Act
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+
+        //Assert
+        assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void t0412_buildMatcherListComplexType() throws Exception {
+        //Arrange
+        MatcherField matcherField = new MatcherField();
+        matcherField.setName("myList");
+        matcherField.setGetterName("getMyList");
+        matcherField.setType(this.getClass().getMethod("getSomething").getGenericReturnType());
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+
+        String expected = "java.util.List<dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomething> items = expected.getMyList();\n" +
+                "if (items == null) {\n" +
+                "  this.myListMatcher = nullValue();\n" +
+                "} else {\n" +
+                "  java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
+                "  for (dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomething item : items) {\n" +
+                "    org.hamcrest.Matcher matcher = item == null ? nullValue() : isMatcherBuilderTestDataSomething(item);\n" +
+                "    matchers.add(matcher);\n" +
+                "  }\n" +
+                "  this.myListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
+                "}\n";
+
+        //Act
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+
+        //Assert
+        assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void t0413_buildMatcherListDouble() throws Exception {
+        //Arrange
+        MatcherField matcherField = new MatcherField();
+        matcherField.setName("myList");
+        matcherField.setGetterName("getMyList");
+        matcherField.setType(this.getClass().getMethod("getDouble").getGenericReturnType());
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+
+        String expected = "java.util.List<java.lang.Double> items = expected.getMyList();\n" +
+                "if (items == null) {\n" +
+                "  this.myListMatcher = nullValue();\n" +
+                "} else {\n" +
+                "  java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
+                "  for (java.lang.Double item : items) {\n" +
+                "    org.hamcrest.Matcher matcher = is(item);\n" +
+                "    matchers.add(matcher);\n" +
+                "  }\n" +
+                "  this.myListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
+                "}\n";
+
+        //Act
+        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+
+        //Assert
+        assertEquals(expected, result.toString());
+    }
+
+    // used by t0411
+    public List<String> getList() {
+        return Collections.emptyList();
+    }
+
+    // used by t0412
+    public List<MatcherBuilderTestDataSomething> getSomething() {
+        return Collections.emptyList();
+    }
+
+    // used by t0413
+    public List<Double> getDouble() {
+        return Collections.emptyList();
     }
 
 }

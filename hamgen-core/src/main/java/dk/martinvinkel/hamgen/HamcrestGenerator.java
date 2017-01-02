@@ -1,8 +1,8 @@
 package dk.martinvinkel.hamgen;
 
 import com.squareup.javapoet.*;
+import dk.martinvinkel.hamgen.builder.MatcherBuilder;
 import dk.martinvinkel.hamgen.log.Logger;
-import org.hamcrest.Matchers;
 import org.reflections.Reflections;
 
 import javax.xml.bind.annotation.XmlType;

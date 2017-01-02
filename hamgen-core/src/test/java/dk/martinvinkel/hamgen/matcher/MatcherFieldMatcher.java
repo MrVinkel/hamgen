@@ -1,10 +1,13 @@
 package dk.martinvinkel.hamgen.matcher;
 
 import dk.martinvinkel.hamgen.HamGenDiagnosingMatcher;
-import dk.martinvinkel.hamgen.MatcherField;
+import dk.martinvinkel.hamgen.builder.MatcherField;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 

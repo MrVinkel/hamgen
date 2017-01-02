@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://martinvinkel.dk/hamgen/testdata"
+           xmlns:ns1="http://martinvinkel.dk/hamgen/testdata">
+    <xs:import schemaLocation="Employee.xsd" namespace="http://martinvinkel.dk/hamgen/testdata"/>
+
+    <xs:element name="Company">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Name" type="xs:string"/>
+                <xs:element ref="ns1:Address"/>
+                <xs:element ref="ns1:EmployeeCollection"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="EmployeeCollection">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:Employee"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

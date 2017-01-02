@@ -1,11 +1,14 @@
-package dk.martinvinkel.hamgen;
+package dk.martinvinkel.hamgen.builder;
 
 import com.squareup.javapoet.*;
+import dk.martinvinkel.hamgen.log.Logger;
 import dk.martinvinkel.hamgen.util.StringUtil;
 import org.hamcrest.Matcher;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.*;
 
 import static dk.martinvinkel.hamgen.HamProperties.Key.MATCHER_POST_FIX;
 import static dk.martinvinkel.hamgen.util.ClassUtil.isPrimitiveWrapper;
@@ -15,21 +18,21 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 public class MatcherField {
     private String getterName;
     private String name;
-    private Class<?> type;
+    private Type type;
     private String fieldPostFix = MATCHER_POST_FIX.getDefaultValue();
 
     MatcherField() {
         //Use builder
     }
 
-    private MatcherField(String getterName, String name, String fieldPostFix, Class<?> type) {
+    private MatcherField(String getterName, String name, String fieldPostFix, Type type) {
         this.getterName = getterName;
         this.name = name;
         this.fieldPostFix = fieldPostFix;
         this.type = type;
     }
 
-    public static Builder builder(Class<?> type, String getterName) {
+    public static Builder builder(Type type, String getterName) {
         return new Builder(type, getterName);
     }
 
@@ -45,7 +48,7 @@ public class MatcherField {
         this.getterName = getterName;
     }
 
-    private String getOrigName() {
+    public String getOrigName() {
         return name;
     }
 
@@ -57,11 +60,18 @@ public class MatcherField {
         this.name = name;
     }
 
-    public Class<?> getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(Class<?> type) {
+    public Class<?> getTypeClass() {
+        if(type instanceof ParameterizedType) {
+            return (Class)((ParameterizedType) type).getRawType();
+        }
+        return (Class)type;
+    }
+
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -75,10 +85,11 @@ public class MatcherField {
 
 
     public static class Builder {
+        private static final Logger LOGGER = Logger.getLogger();
         private MatcherField matcherField = new MatcherField();
         private Map<ClassName, String> staticImports = new HashMap<>();
 
-        private Builder(Class<?> type, String getterName) {
+        private Builder(Type type, String getterName) {
             withType(type);
             withGetterName(getterName);
             withPostFix(MATCHER_POST_FIX.getDefaultValue());
@@ -100,7 +111,7 @@ public class MatcherField {
             return this;
         }
 
-        public Builder withType(Class<?> type) {
+        public Builder withType(Type type) {
             matcherField.setType(type);
             return this;
         }
@@ -150,26 +161,58 @@ public class MatcherField {
         }
 
         public CodeBlock buildMatcherInitialization(String expectedName, String matcherPreFix, String packagePostFix) {
+            LOGGER.debug(matcherField.getType().toString());
             if (matcherField.getType() == String.class) {
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName())
                         .build();
-            } else if (matcherField.getType().isPrimitive() || isPrimitiveWrapper(matcherField.getType()) || matcherField.getType().isEnum()) {
+            } else if (matcherField.getTypeClass().isPrimitive() || isPrimitiveWrapper(matcherField.getTypeClass()) || matcherField.getTypeClass().isEnum()) {
                 return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName())
                         .build();
+            } else if(Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
+                CodeBlock.Builder builder = CodeBlock.builder();
+
+                ParameterizedType parameterizedType = (ParameterizedType) matcherField.getType();
+                Type collectionType = parameterizedType.getActualTypeArguments()[0];
+                Class<?> collectionClass = (Class<?>) collectionType;
+
+                builder.addStatement("$T<$T> items = expected.$N()", List.class, collectionClass, matcherField.getGetterName());
+                builder.beginControlFlow("if (items == null)");
+                builder.addStatement("this.$N = nullValue()", matcherField.getName());
+                builder.nextControlFlow("else");
+                builder.addStatement("$T<$T> matchers = new $T<>()", List.class, Matcher.class, ArrayList.class);
+                builder.beginControlFlow("for ($T item : items)", collectionClass);
+                if(collectionType == String.class) {
+                    builder.addStatement("$T matcher = item == null ||item.isEmpty() ? isEmptyOrNullString() : is(item)", Matcher.class);
+                } else if(collectionClass.isPrimitive() || isPrimitiveWrapper(collectionClass) || collectionClass.isEnum()) {
+                    builder.addStatement("$T matcher = is(item)", Matcher.class);
+                } else {
+                    addStaticImport(packagePostFix, matcherPreFix, collectionClass);
+                    builder.addStatement("$T matcher = item == null ? nullValue() : is$N(item)", Matcher.class, collectionClass.getSimpleName());
+                }
+                builder.addStatement("matchers.add(matcher)");
+                builder.endControlFlow();
+                builder.addStatement("this.$N = contains(matchers.toArray(new $T[matchers.size()]))", matcherField.getName(), Matcher.class);
+                builder.endControlFlow();
+                return builder.build();
             } else {
                 // Assume a matcher is generated for the type
-                String matcherFactoryName = matcherPreFix + capitalizeFirstLetter(matcherField.getOrigName());
-                ClassName matcherClass = ClassName.get(matcherField.getType().getPackage().getName() + packagePostFix, matcherField.getType().getSimpleName() + matcherField.getFieldPostFix());
-                staticImports.put(matcherClass, matcherFactoryName);
+                String matcherFactoryName = matcherPreFix + capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
+                addStaticImport(packagePostFix, matcherPreFix, matcherField.getTypeClass());
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : $N($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         matcherFactoryName, expectedName, matcherField.getGetterName())
                         .build();
             }
+        }
+
+        private void addStaticImport(String packagePostFix, String matcherPreFix, Class clazz) {
+            String matcherFactoryName = matcherPreFix + capitalizeFirstLetter(clazz.getSimpleName());
+            ClassName matcherClass = ClassName.get(clazz.getPackage().getName() + packagePostFix, clazz.getSimpleName() + matcherField.getFieldPostFix());
+            staticImports.put(matcherClass, matcherFactoryName);
         }
 
         public Map<ClassName, String> buildStaticImports() {

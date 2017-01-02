@@ -1,11 +1,13 @@
-package dk.martinvinkel.hamgen;
+package dk.martinvinkel.hamgen.builder;
 
 import com.squareup.javapoet.*;
+import dk.martinvinkel.hamgen.HamGenDiagnosingMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matchers;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static com.squareup.javapoet.TypeName.OBJECT;
@@ -66,7 +68,7 @@ public class MatcherBuilder {
             return this;
         }
 
-        Class<?> type = getterMethod.getReturnType();
+        Type type = getterMethod.getGenericReturnType();
         String name = getterMethod.getName();
         MatcherField matcherField = MatcherField.builder(type, name).withPostFix(matcherNamePostFix).build();
         matcherFields.add(matcherField);

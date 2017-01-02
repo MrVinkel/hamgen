@@ -1,15 +1,13 @@
-package dk.martinvinkel.hamgen;
+package dk.martinvinkel.hamgen.builder;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataListSomething;
 import dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import java.lang.reflect.Method;
-import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 
@@ -211,6 +209,71 @@ public class MatcherBuilderTest {
         // Assert
         assertEquals(expected, result.toString());
         assertThat(staticImportsResult.entrySet(), allOf(hasSize(1), (Matcher)hasItem(expectedStaticImport)));
+    }
+
+    @Test
+    public void t0204_ListField() throws Exception {
+        // Arrange
+        String expected =
+                "public class MatcherBuilderTestDataListSomethingMatcher extends dk.martinvinkel.hamgen.HamGenDiagnosingMatcher {\n" +
+                        "  protected org.hamcrest.Matcher someListMatcher;\n" +
+                        "\n" +
+                        "  public MatcherBuilderTestDataListSomethingMatcher(com.test.MatcherBuilderTestDataListSomething expected) {\n" +
+                        "    java.util.List<dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse> items = expected.getSomeList();\n" +
+                        "    if (items == null) {\n" +
+                        "      this.someListMatcher = nullValue();\n" +
+                        "    } else {\n" +
+                        "      java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
+                        "      for (dk.martinvinkel.hamgen.testdata.MatcherBuilderTestDataSomethingElse item : items) {\n" +
+                        "        org.hamcrest.Matcher matcher = item == null ? nullValue() : isMatcherBuilderTestDataSomethingElse(item);\n" +
+                        "        matchers.add(matcher);\n" +
+                        "      }\n" +
+                        "      this.someListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "\n" +
+                        "  @java.lang.Override\n" +
+                        "  public boolean matchesSafely(java.lang.Object item, org.hamcrest.Description mismatchDesc) {\n" +
+                        "    boolean matches = true;\n" +
+                        "    com.test.MatcherBuilderTestDataListSomething actual = (com.test.MatcherBuilderTestDataListSomething) item;\n" +
+                        "    mismatchDesc.appendText(\"{\");\n" +
+                        "    if (!someListMatcher.matches(actual.getSomeList())) {\n" +
+                        "      reportMismatch(\"someList\", someListMatcher, actual.getSomeList(), mismatchDesc, matches);\n" +
+                        "      matches = false;\n" +
+                        "    }\n" +
+                        "    mismatchDesc.appendText(\"}\");\n" +
+                        "    return matches;\n" +
+                        "  }\n" +
+                        "\n" +
+                        "  @java.lang.Override\n" +
+                        "  public void describeTo(org.hamcrest.Description desc) {\n" +
+                        "    desc.appendText(\"{\");\n" +
+                        "    desc.appendText(\"someList \");\n" +
+                        "    desc.appendDescriptionOf(someListMatcher);\n" +
+                        "    desc.appendText(\"}\");\n" +
+                        "  }\n" +
+                        "\n" +
+                        "  @org.hamcrest.Factory\n" +
+                        "  public static com.test.matcher.MatcherBuilderTestDataListSomethingMatcher isMatcherBuilderTestDataListSomething(com.test.MatcherBuilderTestDataListSomething expected) {\n" +
+                        "    return new com.test.matcher.MatcherBuilderTestDataListSomethingMatcher(expected);\n" +
+                        "  }\n" +
+                        "}\n";
+
+        SimpleEntry<ClassName, String> expectedStaticImport1 = new SimpleEntry<>(ClassName.get(Matchers.class), "*");
+        SimpleEntry<ClassName, String> expectedStaticImport2 = new SimpleEntry<>(ClassName.get("dk.martinvinkel.hamgen.testdata.matcher", "MatcherBuilderTestDataSomethingElseMatcher"), "isMatcherBuilderTestDataSomethingElse");
+
+        // Act
+        //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
+        //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
+        MatcherBuilder matcherBuilder = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestDataListSomething")
+                .matchFields(MatcherBuilderTestDataListSomething.class.getMethod("getSomeList"));
+        TypeSpec result = matcherBuilder.build();
+
+        Map<ClassName, String> staticImportsResult = matcherBuilder.buildStaticImports();
+
+        // Assert
+        assertEquals(expected, result.toString());
+        assertThat(staticImportsResult.entrySet(), allOf(hasSize(2), (Matcher)hasItem(expectedStaticImport1), hasItem(expectedStaticImport2)));
     }
 
 }
