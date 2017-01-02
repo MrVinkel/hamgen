@@ -4,23 +4,23 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dk.martinvinkel</groupId>
+        <groupId>org.hamgen</groupId>
         <artifactId>integrationtest</artifactId>
         <version>1.0</version>
     </parent>
 
-    <groupId>dk.martinvinkel.integrationtest</groupId>
+    <groupId>org.hamgen.integrationtest</groupId>
     <artifactId>matchers</artifactId>
     <version>1.0</version>
 
     <dependencies>
         <dependency>
-            <groupId>dk.martinvinkel.integrationtest</groupId>
+            <groupId>org.hamgen.integrationtest</groupId>
             <artifactId>schemas</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>dk.martinvinkel</groupId>
+            <groupId>org.hamgen</groupId>
             <artifactId>hamgen-core</artifactId>
             <version>1.0</version>
         </dependency>
@@ -33,7 +33,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>dk.martinvinkel</groupId>
+                <groupId>org.hamgen</groupId>
                 <artifactId>hamgen-maven-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
@@ -44,7 +44,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <packageName>dk.martinvinkel.hamgen.integrationtest.schemapackage</packageName>
+                            <packageName>org.hamgen.integrationtest.schemapackage</packageName>
                             <outputDir>${project.build.directory}/generated-test-sources/hamgen</outputDir>
                             <annotation>javax.xml.bind.annotation.XmlType</annotation>
                         </configuration>
@@ -52,7 +52,7 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>dk.martinvinkel.integrationtest</groupId>
+                        <groupId>org.hamgen.integrationtest</groupId>
                         <artifactId>schemas</artifactId>
                         <version>1.0</version>
                     </dependency>

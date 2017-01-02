@@ -16,7 +16,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
 ```xml
 ...
 <dependency>
-    <groupId>dk.martinvinkel</groupId>
+    <groupId>org.hamgen</groupId>
     <artifactId>hamgen-core</artifactId>
     <version>1.0</version>
 </dependency>
@@ -27,7 +27,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
 </dependency>
 ...
 <plugin>
-    <groupId>dk.martinvinkel</groupId>
+    <groupId>org.hamgen</groupId>
     <artifactId>hamgen-maven-plugin</artifactId>
     <version>1.0</version>
     <executions>

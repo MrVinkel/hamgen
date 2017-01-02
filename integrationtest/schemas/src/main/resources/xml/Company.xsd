@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://martinvinkel.dk/hamgen/testdata"
-           xmlns:ns1="http://martinvinkel.dk/hamgen/testdata">
-    <xs:import schemaLocation="Employee.xsd" namespace="http://martinvinkel.dk/hamgen/testdata"/>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://org/hamgen/testdata"
+           xmlns:ns1="http://org/hamgen/testdata">
+    <xs:import schemaLocation="Employee.xsd" namespace="http://org/hamgen/testdata"/>
 
     <xs:element name="Company">
         <xs:complexType>
