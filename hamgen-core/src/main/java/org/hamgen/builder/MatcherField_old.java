@@ -1,11 +1,11 @@
 package org.hamgen.builder;
 
 import com.squareup.javapoet.*;
-import org.hamgen.log.Logger;
-import org.hamgen.util.StringUtil;
 import org.hamcrest.Matcher;
 import org.hamgen.HamProperties;
+import org.hamgen.log.Logger;
 import org.hamgen.util.ClassUtil;
+import org.hamgen.util.StringUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -13,17 +13,17 @@ import java.util.*;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 
-public class MatcherField {
+public class MatcherField_old {
     private String getterName;
     private String name;
     private Type type;
     private String fieldPostFix = HamProperties.Key.MATCHER_POST_FIX.getDefaultValue();
 
-    MatcherField() {
+    MatcherField_old() {
         //Use builder
     }
 
-    private MatcherField(String getterName, String name, String fieldPostFix, Type type) {
+    private MatcherField_old(String getterName, String name, String fieldPostFix, Type type) {
         this.getterName = getterName;
         this.name = name;
         this.fieldPostFix = fieldPostFix;
@@ -34,7 +34,7 @@ public class MatcherField {
         return new Builder(type, getterName);
     }
 
-    public static Builder builder(MatcherField matcherField) {
+    public static Builder builder(MatcherField_old matcherField) {
         return new Builder(matcherField);
     }
 
@@ -84,7 +84,7 @@ public class MatcherField {
 
     public static class Builder {
         private static final Logger LOGGER = Logger.getLogger();
-        private MatcherField matcherField = new MatcherField();
+        private MatcherField_old matcherField = new MatcherField_old();
         private Map<ClassName, String> staticImports = new HashMap<>();
 
         private Builder(Type type, String getterName) {
@@ -93,7 +93,7 @@ public class MatcherField {
             withPostFix(HamProperties.Key.MATCHER_POST_FIX.getDefaultValue());
         }
 
-        private Builder(MatcherField matcherField) {
+        private Builder(MatcherField_old matcherField) {
             withType(matcherField.getType());
             withGetterName(matcherField.getGetterName());
             withPostFix(matcherField.getFieldPostFix());
@@ -126,8 +126,8 @@ public class MatcherField {
             return this;
         }
 
-        public MatcherField build() {
-            return new MatcherField(matcherField.getGetterName(), matcherField.getOrigName(), matcherField.fieldPostFix, matcherField.getType());
+        public MatcherField_old build() {
+            return new MatcherField_old(matcherField.getGetterName(), matcherField.getOrigName(), matcherField.fieldPostFix, matcherField.getType());
         }
 
         public FieldSpec buildFieldSpec() {

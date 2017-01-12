@@ -1,22 +1,25 @@
 package org.hamgen.builder;
 
 import com.squareup.javapoet.*;
-import org.hamgen.HamGenDiagnosingMatcher;
-import org.hamgen.log.Logger;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matchers;
+import org.hamgen.HamGenDiagnosingMatcher;
 import org.hamgen.HamProperties;
+import org.hamgen.log.Logger;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.squareup.javapoet.TypeName.OBJECT;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-public class MatcherBuilder {
+public class MatcherBuilder_old {
     private static final Logger LOGGER = Logger.getLogger();
 
     private static final String PARAM_NAME_EXPECTED = "expected";
@@ -35,27 +38,27 @@ public class MatcherBuilder {
     private List<MatcherField> matcherFields = new ArrayList<>();
     private Map<ClassName, String> staticImports = new HashMap<>();
 
-    private MatcherBuilder(String originalPackageName, String originalClassName) {
+    private MatcherBuilder_old(String originalPackageName, String originalClassName) {
         this.originalPackageName = originalPackageName.trim();
         this.originalClassName = originalClassName.trim();
         this.staticImports.put(ClassName.get(Matchers.class), "*");
     }
 
-    public static MatcherBuilder matcherBuild(String packageName, String className) {
-        return new MatcherBuilder(packageName, className);
+    public static MatcherBuilder_old matcherBuild(String packageName, String className) {
+        return new MatcherBuilder_old(packageName, className);
     }
 
-    public MatcherBuilder withMatcherPrefix(String matcherPreFix) {
+    public MatcherBuilder_old withMatcherPrefix(String matcherPreFix) {
         this.matcherPreFix = matcherPreFix.trim();
         return this;
     }
 
-    public MatcherBuilder withMatcherNamePostfix(String matcherNamePostFix) {
+    public MatcherBuilder_old withMatcherNamePostfix(String matcherNamePostFix) {
         this.matcherNamePostFix = matcherNamePostFix.trim();
         return this;
     }
 
-    public MatcherBuilder withPackagePostFix(String packagePostFix) {
+    public MatcherBuilder_old withPackagePostFix(String packagePostFix) {
         packagePostFix = packagePostFix.trim();
         if (!packagePostFix.substring(0, 1).equals(".")) {
             packagePostFix = "." + packagePostFix;
@@ -64,7 +67,7 @@ public class MatcherBuilder {
         return this;
     }
 
-    public MatcherBuilder matchField(Method getterMethod) {
+    public MatcherBuilder_old matchField(Method getterMethod) {
         if (!isGetterMethod(getterMethod)) {
             LOGGER.debug("Not a getter method: " + getterMethod.getName());
             return this;
@@ -77,7 +80,7 @@ public class MatcherBuilder {
         return this;
     }
 
-    public MatcherBuilder matchFields(Method... getterMethods) {
+    public MatcherBuilder_old matchFields(Method... getterMethods) {
         for (Method method : getterMethods) {
             matchField(method);
         }
