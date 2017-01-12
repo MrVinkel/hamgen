@@ -109,7 +109,7 @@ public class MatcherFieldTest {
                 "desc.appendDescriptionOf(somethingMatch);\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildDescriptionTo(true, "desc");
+        CodeBlock result = matcherFieldBuilder.buildDescribeTo(true, "desc");
 
         //Assert
         assertEquals(expected, result.toString());
@@ -130,7 +130,7 @@ public class MatcherFieldTest {
                 "desc.appendDescriptionOf(somethingMatch);\n";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildDescriptionTo(false, "desc");
+        CodeBlock result = matcherFieldBuilder.buildDescribeTo(false, "desc");
 
         //Assert
         assertEquals(expected, result.toString());

@@ -1,17 +1,17 @@
 package org.hamgen.builder;
 
-import com.squareup.javapoet.*;
+import com.sun.codemodel.*;
 import org.hamgen.log.Logger;
 import org.hamgen.util.StringUtil;
-import org.hamcrest.Matcher;
 import org.hamgen.HamProperties;
 import org.hamgen.util.ClassUtil;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static javax.lang.model.element.Modifier.PROTECTED;
+import static com.sun.codemodel.JExpr.FALSE;
 
 public class MatcherField {
     private String getterName;
@@ -85,7 +85,6 @@ public class MatcherField {
     public static class Builder {
         private static final Logger LOGGER = Logger.getLogger();
         private MatcherField matcherField = new MatcherField();
-        private Map<ClassName, String> staticImports = new HashMap<>();
 
         private Builder(Type type, String getterName) {
             withType(type);
@@ -130,61 +129,54 @@ public class MatcherField {
             return new MatcherField(matcherField.getGetterName(), matcherField.getOrigName(), matcherField.fieldPostFix, matcherField.getType());
         }
 
-        public FieldSpec buildFieldSpec() {
-            TypeName matcher = ClassName.get(Matcher.class);
-            return FieldSpec.builder(matcher, matcherField.getName())
-                    .addModifiers(PROTECTED)
-                    .build();
+        public JFieldVar buildFieldSpec(JDefinedClass matcherClass, JClass hamcrestMatcherClass) {
+            return matcherClass.field(Modifier.PROTECTED, hamcrestMatcherClass, matcherField.getName());
         }
 
-        public CodeBlock buildDescriptionTo(boolean firstField, String descriptionParameter) {
-            CodeBlock.Builder descriptionTo = CodeBlock.builder();
-
-            if (!firstField) {
-                descriptionTo.addStatement("$N.appendText($S)", descriptionParameter, ", ");
+        public JBlock buildDescribeTo(JBlock describeToBody, JVar descriptionParam, boolean first) {
+            if (!first) {
+                describeToBody.invoke(descriptionParam, "appendText").arg(", ");
             }
-
-            return descriptionTo.addStatement("$N.appendText($S)", descriptionParameter, matcherField.getOrigName() + " ")
-                    .addStatement("$N.appendDescriptionOf($N)", descriptionParameter, matcherField.getName())
-                    .build();
+            describeToBody.invoke(descriptionParam, "appendText").arg(matcherField.getGetterName());
+            describeToBody.invoke(descriptionParam, "appendDescriptionOf").arg(matcherField.getName());
+            return describeToBody;
         }
 
-        public CodeBlock buildMatchesSafely(ParameterSpec actualParameter, ParameterSpec mismatchDescriptionParameter, ParameterSpec matchesLocalField) {
-            return CodeBlock.builder()
-                    .beginControlFlow("if (!$N.matches($N.$N()))", matcherField.getName(), actualParameter, matcherField.getGetterName())
-                    .addStatement("reportMismatch($S, $N, $N.$N(), $N, $N)", matcherField.getOrigName(), matcherField.getName(), actualParameter, matcherField.getGetterName(), mismatchDescriptionParameter, matchesLocalField)
-                    .addStatement("$N = false", matchesLocalField)
-                    .endControlFlow()
-                    .build();
+        public JBlock buildMatchesSafely(JBlock matcherSafelyBody, JVar matcher, JVar actual, JVar matches, JVar mismatchDescription, JClass hamcrestMatcherClass) {
+            JBlock matchFailedBlock = matcherSafelyBody._if(matcher.invoke("matches").arg(actual.invoke(matcherField.getGetterName())).not())._then();
+            matchFailedBlock.staticInvoke(hamcrestMatcherClass, "reportMismatch").arg(matcherField.getOrigName()).arg(matcher).arg(actual.invoke(matcherField.getGetterName())).arg(mismatchDescription).arg(matches);
+            matchFailedBlock.assign(matches, FALSE);
+            return matcherSafelyBody;
         }
 
         // todo refactor this mess
-        public CodeBlock buildMatcherInitialization(String expectedName, String matcherPreFix, String packagePostFix) {
-            LOGGER.debug(matcherField.getType().toString());
+        public JBlock buildMatcherInitialization(JBlock constructorBody) {
+//            LOGGER.debug(matcherField.getType().toString());
             if (matcherField.getType() == String.class) {
-                return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
+                /*return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName(),
                         expectedName, matcherField.getGetterName())
-                        .build();
+                        .build();*/
             } else if (matcherField.getTypeClass().isPrimitive() || ClassUtil.isPrimitiveWrapper(matcherField.getTypeClass()) || matcherField.getTypeClass().isEnum()) {
-                return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
+                /*return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName())
-                        .build();
+                        .build();*/
             } else if(Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
-                return buildCollectionMatcher(matcherPreFix, packagePostFix);
+//                return buildCollectionMatcher(matcherPreFix, packagePostFix);
             } else {
                 // Assume a matcher is generated for the type
-                String matcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
+                /*String matcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
                 addStaticImport(packagePostFix, matcherPreFix, matcherField.getTypeClass());
                 return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : $N($N.$N())",
                         matcherField.getName(), expectedName, matcherField.getGetterName(),
                         matcherFactoryName, expectedName, matcherField.getGetterName())
-                        .build();
+                        .build();*/
             }
+            return constructorBody;
         }
 
-        private CodeBlock buildCollectionMatcher(String matcherPreFix, String packagePostFix) {
+        /*private CodeBlock buildCollectionMatcher(String matcherPreFix, String packagePostFix) {
             CodeBlock.Builder builder = CodeBlock.builder();
 
             ParameterizedType parameterizedType = (ParameterizedType) matcherField.getType();
@@ -210,17 +202,7 @@ public class MatcherField {
             builder.addStatement("this.$N = contains(matchers.toArray(new $T[matchers.size()]))", matcherField.getName(), Matcher.class);
             builder.endControlFlow();
             return builder.build();
-        }
-
-        private void addStaticImport(String packagePostFix, String matcherPreFix, Class clazz) {
-            String matcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(clazz.getSimpleName());
-            ClassName matcherClass = ClassName.get(clazz.getPackage().getName() + packagePostFix, clazz.getSimpleName() + matcherField.getFieldPostFix());
-            staticImports.put(matcherClass, matcherFactoryName);
-        }
-
-        public Map<ClassName, String> buildStaticImports() {
-            return staticImports;
-        }
+        }*/
 
     }
 
