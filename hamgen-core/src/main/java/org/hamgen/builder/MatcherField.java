@@ -133,12 +133,12 @@ public class MatcherField {
             return matcherClass.field(Modifier.PROTECTED, hamcrestMatcherClass, matcherField.getName());
         }
 
-        public JBlock buildDescribeTo(JBlock describeToBody, JVar descriptionParam, boolean first) {
+        public JBlock buildDescribeTo(JBlock describeToBody, JVar descriptionParam, JVar matcher, boolean first) {
             if (!first) {
                 describeToBody.invoke(descriptionParam, "appendText").arg(", ");
             }
-            describeToBody.invoke(descriptionParam, "appendText").arg(matcherField.getGetterName());
-            describeToBody.invoke(descriptionParam, "appendDescriptionOf").arg(matcherField.getName());
+            describeToBody.invoke(descriptionParam, "appendText").arg(matcherField.getOrigName() + " ");
+            describeToBody.invoke(descriptionParam, "appendDescriptionOf").arg(matcher);
             return describeToBody;
         }
 

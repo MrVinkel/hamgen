@@ -28,7 +28,7 @@ public class MatcherBuilder {
     private String originalPackageName;
     private String packagePostFix = HamProperties.Key.PACKAGE_POST_FIX.getDefaultValue();
     private String matcherPreFix = HamProperties.Key.MATCHER_PRE_FIX.getDefaultValue();
-    private List<MatcherField> matcherFields = new ArrayList<>();
+    private List<MatcherField> matcherFields = new ArrayList<MatcherField>();
     private JCodeModel codeModel;
 
     private MatcherBuilder(String originalPackageName, String originalClassName) {
@@ -126,7 +126,7 @@ public class MatcherBuilder {
             JFieldVar matcher = matcherFieldBuilder.buildFieldSpec(matcherClass, hamcrestMatcherClass);
             matcherFieldBuilder.buildMatcherInitialization(constructorBody);
             matcherFieldBuilder.buildMatchesSafely(matchtSafelyBody, matcher, actual, matches, mismatchDescriptionParam, hamcrestMatcherClass);
-            matcherFieldBuilder.buildDescribeTo(describeToBody, descriptionParam, firstField);
+            matcherFieldBuilder.buildDescribeTo(describeToBody, descriptionParam, matcher, firstField);
 
             firstField = false;
         }

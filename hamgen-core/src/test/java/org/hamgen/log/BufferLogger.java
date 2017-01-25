@@ -9,7 +9,7 @@ import static org.hamgen.log.Logger.LogLevel.*;
 
 public class BufferLogger extends StandardOutLogger {
 
-    private static List<Entry<LogLevel,String>> log = new ArrayList<>();
+    private static List<Entry<LogLevel,String>> log = new ArrayList<Entry<LogLevel,String>>();
 
     public BufferLogger(LogLevel level) {
         super(level);
@@ -57,7 +57,7 @@ public class BufferLogger extends StandardOutLogger {
     }
 
     protected void logMessage(LogLevel level, String message, Throwable t) {
-        BufferLogger.log.add(new AbstractMap.SimpleEntry<>(level, message));
+        BufferLogger.log.add(new AbstractMap.SimpleEntry<LogLevel,String>(level, message));
         super.logMessage(level, message, t);
     }
 
