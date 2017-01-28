@@ -1,6 +1,7 @@
 package org.hamgen.builder;
 
 import com.sun.codemodel.*;
+import org.hamcrest.Matchers;
 import org.hamgen.log.Logger;
 import org.hamgen.util.StringUtil;
 import org.hamgen.HamProperties;
@@ -85,6 +86,7 @@ public class MatcherField {
     public static class Builder {
         private static final Logger LOGGER = Logger.getLogger();
         private MatcherField matcherField = new MatcherField();
+        private JCodeModel codeModel;
 
         private Builder(Type type, String getterName) {
             withType(type);
@@ -96,6 +98,11 @@ public class MatcherField {
             withType(matcherField.getType());
             withGetterName(matcherField.getGetterName());
             withPostFix(matcherField.getFieldPostFix());
+        }
+
+        public Builder withCodeModel(JCodeModel codeModel) {
+            this.codeModel = codeModel;
+            return this;
         }
 
         private Builder withName(String name) {
@@ -150,30 +157,30 @@ public class MatcherField {
         }
 
         // todo refactor this mess
-        public JBlock buildMatcherInitialization(JBlock constructorBody) {
-//            LOGGER.debug(matcherField.getType().toString());
+        public JBlock buildMatcherInitialization(JBlock constructorBody, JVar matcher, JVar expected) {
+            JClass matchers = codeModel.ref(Matchers.class);
+            JInvocation invokeMatcherIs = matchers.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
+
+            JExpression assignmentExpression;
+
             if (matcherField.getType() == String.class) {
-                /*return CodeBlock.builder().addStatement("this.$N = $N.$N() == null || $N.$N().isEmpty() ? isEmptyOrNullString() : is($N.$N())",
-                        matcherField.getName(), expectedName, matcherField.getGetterName(),
-                        expectedName, matcherField.getGetterName(),
-                        expectedName, matcherField.getGetterName())
-                        .build();*/
+                JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null()).cor(expected.invoke(matcherField.getGetterName()).invoke("isEmpty"));
+                JInvocation invokeMatcherIsEmptyOrNullString = matchers.staticInvoke("isEmptyOrNullString");
+                assignmentExpression = JOp.cond(condition, invokeMatcherIsEmptyOrNullString, invokeMatcherIs);
             } else if (matcherField.getTypeClass().isPrimitive() || ClassUtil.isPrimitiveWrapper(matcherField.getTypeClass()) || matcherField.getTypeClass().isEnum()) {
-                /*return CodeBlock.builder().addStatement("this.$N = is($N.$N())",
-                        matcherField.getName(), expectedName, matcherField.getGetterName())
-                        .build();*/
+                //todo make this the default assignmentExpression
+                assignmentExpression = invokeMatcherIs;
             } else if(Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
+                assignmentExpression = null;
 //                return buildCollectionMatcher(matcherPreFix, packagePostFix);
             } else {
+                // todo make this explicit if
                 // Assume a matcher is generated for the type
-                /*String matcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
-                addStaticImport(packagePostFix, matcherPreFix, matcherField.getTypeClass());
-                return CodeBlock.builder().addStatement("this.$N = $N.$N() == null ? nullValue() : $N($N.$N())",
-                        matcherField.getName(), expectedName, matcherField.getGetterName(),
-                        matcherFactoryName, expectedName, matcherField.getGetterName())
-                        .build();*/
+                JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
+                JInvocation invokeMatcherNullValue = matchers.staticInvoke("nullValue");
+                assignmentExpression = JOp.cond(condition, invokeMatcherNullValue, invokeMatcherIs);
             }
-            return constructorBody;
+            return constructorBody.assign(matcher, assignmentExpression);
         }
 
         /*private CodeBlock buildCollectionMatcher(String matcherPreFix, String packagePostFix) {
