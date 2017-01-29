@@ -9,7 +9,7 @@ public class ClassUtil {
         // Util methods borrowed from Commons Lang ClassUtil
     }
 
-    private static final Map<Class<?>, Class<?>> primitiveWrapperMap = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> primitiveWrapperMap = new HashMap<Class<?>, Class<?>>();
 
     static {
         primitiveWrapperMap.put(Boolean.TYPE, Boolean.class);
@@ -23,7 +23,7 @@ public class ClassUtil {
         primitiveWrapperMap.put(Void.TYPE, Void.TYPE);
     }
 
-    private static final Map<Class<?>, Class<?>> wrapperPrimitiveMap = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> wrapperPrimitiveMap = new HashMap<Class<?>, Class<?>>();
 
     static {
         for (Class<?> primitiveClass : primitiveWrapperMap.keySet()) {

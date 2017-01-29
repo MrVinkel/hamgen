@@ -1,4 +1,4 @@
-package org.hamgen.matcher;
+package org.hamgen.testtools.matcher;
 
 import org.hamgen.HamGenDiagnosingMatcher;
 import org.hamgen.builder.MatcherField;

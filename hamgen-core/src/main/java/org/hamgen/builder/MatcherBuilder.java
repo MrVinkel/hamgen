@@ -1,20 +1,17 @@
 package org.hamgen.builder;
 
-import com.squareup.javapoet.*;
+import com.sun.codemodel.*;
+import org.hamcrest.*;
 import org.hamgen.HamGenDiagnosingMatcher;
 import org.hamgen.log.Logger;
-import org.hamcrest.Description;
-import org.hamcrest.Factory;
-import org.hamcrest.Matchers;
 import org.hamgen.HamProperties;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static com.squareup.javapoet.TypeName.OBJECT;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
+import static com.sun.codemodel.JExpr.TRUE;
+import static java.lang.reflect.Modifier.PUBLIC;
 
 public class MatcherBuilder {
     private static final Logger LOGGER = Logger.getLogger();
@@ -23,7 +20,6 @@ public class MatcherBuilder {
     private static final String PARAM_NAME_DESCRIPTION = "desc";
     private static final String PARAM_NAME_ACTUAL_ITEM = "item";
     private static final String PARAM_NAME_MISMATCH_DESCRIPTION = "mismatchDesc";
-
     private static final String METHOD_NAME_DESCRIPTION_TO = "describeTo";
     private static final String METHOD_NAME_MATCHES_SAFELY = "matchesSafely";
 
@@ -32,18 +28,19 @@ public class MatcherBuilder {
     private String originalPackageName;
     private String packagePostFix = HamProperties.Key.PACKAGE_POST_FIX.getDefaultValue();
     private String matcherPreFix = HamProperties.Key.MATCHER_PRE_FIX.getDefaultValue();
-    private List<MatcherField> matcherFields = new ArrayList<>();
-    private Map<ClassName, String> staticImports = new HashMap<>();
+    private List<MatcherField> matcherFields = new ArrayList<MatcherField>();
+    private JCodeModel codeModel;
 
     private MatcherBuilder(String originalPackageName, String originalClassName) {
         this.originalPackageName = originalPackageName.trim();
         this.originalClassName = originalClassName.trim();
-        this.staticImports.put(ClassName.get(Matchers.class), "*");
+        this.codeModel = new JCodeModel();
     }
 
     public static MatcherBuilder matcherBuild(String packageName, String className) {
         return new MatcherBuilder(packageName, className);
     }
+
 
     public MatcherBuilder withMatcherPrefix(String matcherPreFix) {
         this.matcherPreFix = matcherPreFix.trim();
@@ -84,93 +81,64 @@ public class MatcherBuilder {
         return this;
     }
 
-    public TypeSpec build() {
+    public JCodeModel build() throws Exception {
+        JClass hamcrestMatcherClass = codeModel.ref(HamGenDiagnosingMatcher.class);
+
+        // Create class
         String matcherName = originalClassName + matcherNamePostFix;
         String matcherPackage = originalPackageName + packagePostFix;
-        TypeName originalClass = ClassName.get(originalPackageName, originalClassName);
-        TypeName matcherClass = ClassName.get(matcherPackage, matcherName);
-        TypeName description = ClassName.get(Description.class);
-        TypeName hamGenDiagnosingMatcher = ClassName.get(HamGenDiagnosingMatcher.class);
+        JClass originalClass = codeModel.ref(originalPackageName + "." + originalClassName);
+        JPackage packageName = codeModel._package(matcherPackage);
+        JDefinedClass matcherClass = packageName._class(matcherName);
+        matcherClass._extends(hamcrestMatcherClass);
 
-        TypeSpec.Builder matcherClassBuilder = TypeSpec.classBuilder(matcherName)
-                .superclass(hamGenDiagnosingMatcher)
-                .addModifiers(PUBLIC);
+        // Create constructor
+        JMethod matcherClassConstructor = matcherClass.constructor(PUBLIC);
+        JVar constructorParameterExpectedItem = matcherClassConstructor.param(originalClass, PARAM_NAME_EXPECTED);
+        JBlock constructorBody = matcherClassConstructor.body();
 
-        ParameterSpec expectedConstructorLocalParam = ParameterSpec.builder(originalClass, PARAM_NAME_EXPECTED).build();
-        MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(PUBLIC)
-                .addParameter(expectedConstructorLocalParam);
+        // create description method
+        JMethod describeTo = matcherClass.method(PUBLIC, void.class, METHOD_NAME_DESCRIPTION_TO);
+        JVar descriptionParam = describeTo.param(Description.class, PARAM_NAME_DESCRIPTION);
+        JBlock describeToBody = describeTo.body();
+        describeToBody.invoke(descriptionParam, "appendText").arg("{");
 
-        ParameterSpec expectedFactoryLocalParam = ParameterSpec.builder(originalClass, PARAM_NAME_EXPECTED).build();
-        MethodSpec factoryMethod = MethodSpec.methodBuilder(matcherPreFix + originalClassName)
-                .addAnnotation(Factory.class)
-                .returns(matcherClass)
-                .addModifiers(PUBLIC, STATIC)
-                .addParameter(expectedFactoryLocalParam)
-                .addStatement("return new $T($N)", matcherClass, expectedFactoryLocalParam)
-                .build();
+        // create match method
+        JMethod matchesSafely = matcherClass.method(PUBLIC, boolean.class, METHOD_NAME_MATCHES_SAFELY);
+        JBlock matchtSafelyBody = matchesSafely.body();
+        JVar itemParam = matchesSafely.param(Object.class, PARAM_NAME_ACTUAL_ITEM);
+        JVar mismatchDescriptionParam = matchesSafely.param(Description.class, PARAM_NAME_MISMATCH_DESCRIPTION);
+        JVar actual = matchtSafelyBody.decl(originalClass, "actual", JExpr.cast(originalClass, itemParam));
+        JVar matches = matchtSafelyBody.decl(codeModel.BOOLEAN, "matches", TRUE);
+        matchtSafelyBody.invoke(mismatchDescriptionParam, "appendText").arg("{");
 
-        ParameterSpec descriptionParameter = ParameterSpec.builder(description, PARAM_NAME_DESCRIPTION).build();
-        MethodSpec.Builder descriptionToBuilder = MethodSpec.methodBuilder(METHOD_NAME_DESCRIPTION_TO)
-                .addAnnotation(Override.class)
-                .addModifiers(PUBLIC)
-                .addParameter(descriptionParameter)
-                .addStatement("$N.appendText($S)", descriptionParameter, "{");
-
-        ParameterSpec itemParameter = ParameterSpec.builder(OBJECT, PARAM_NAME_ACTUAL_ITEM).build();
-        ParameterSpec actualLocalParameter = ParameterSpec.builder(originalClass, "actual").build();
-        ParameterSpec mismatchDescriptionParameter = ParameterSpec.builder(description, PARAM_NAME_MISMATCH_DESCRIPTION).build();
-        ParameterSpec matchesLocalField = ParameterSpec.builder(TypeName.BOOLEAN, "matches").build();
-        MethodSpec.Builder matchesSafelyBuilder = MethodSpec.methodBuilder(METHOD_NAME_MATCHES_SAFELY)
-                .addAnnotation(Override.class)
-                .addModifiers(PUBLIC)
-                .returns(TypeName.BOOLEAN)
-                .addParameter(itemParameter)
-                .addParameter(mismatchDescriptionParameter)
-                .addStatement("$T $N = true", matchesLocalField.type, matchesLocalField)
-                .addStatement("$T $N = ($T) $N", actualLocalParameter.type, actualLocalParameter, actualLocalParameter.type, itemParameter)
-                .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "{");
+        // create factory method
+        JMethod jmFactory = matcherClass.method(PUBLIC | JMod.STATIC, matcherClass, matcherPreFix + originalClassName);
+        JVar expectedItemParam = jmFactory.param(originalClass, PARAM_NAME_EXPECTED);
+        jmFactory.annotate(Factory.class);
+        JBlock body = jmFactory.body();
+        body._return(JExpr._new(matcherClass).arg(expectedItemParam));
 
         boolean firstField = true;
         for (MatcherField matcherField : matcherFields) {
-            MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+            MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
-            FieldSpec field = matcherFieldBuilder.buildFieldSpec();
-            matcherClassBuilder.addField(field);
+            JFieldVar matcher = matcherFieldBuilder.buildFieldSpec(matcherClass);
+            matcherFieldBuilder.buildMatcherInitialization(constructorBody, matcher, constructorParameterExpectedItem, matcherPreFix, packagePostFix);
+            matcherFieldBuilder.buildMatchesSafely(matchtSafelyBody, matcher, actual, matches, mismatchDescriptionParam, hamcrestMatcherClass);
+            matcherFieldBuilder.buildDescribeTo(describeToBody, descriptionParam, matcher, firstField);
 
-            CodeBlock constructorBlock = matcherFieldBuilder.buildMatcherInitialization(expectedConstructorLocalParam.name, matcherPreFix, packagePostFix);
-            constructorBuilder.addCode(constructorBlock);
-
-            CodeBlock matcherSafelyBlock = matcherFieldBuilder.buildMatchesSafely(actualLocalParameter, mismatchDescriptionParameter, matchesLocalField);
-            matchesSafelyBuilder.addCode(matcherSafelyBlock);
-
-            CodeBlock descriptionBlock = matcherFieldBuilder.buildDescriptionTo(firstField, descriptionParameter.name);
-            descriptionToBuilder.addCode(descriptionBlock);
-
-            this.staticImports.putAll(matcherFieldBuilder.buildStaticImports());
             firstField = false;
         }
 
-        MethodSpec descriptionToMethod = descriptionToBuilder
-                .addStatement("$N.appendText($S)", descriptionParameter, "}")
-                .build();
+        // finalize description
+        describeToBody.invoke(descriptionParam, "appendText").arg("}");
 
-        MethodSpec matchesSafelyMethod = matchesSafelyBuilder
-                .addStatement("$N.appendText($S)", mismatchDescriptionParameter, "}")
-                .addStatement("return $N", matchesLocalField)
-                .build();
+        // finalize match method
+        matchtSafelyBody.invoke(mismatchDescriptionParam, "appendText").arg("}");
+        matchtSafelyBody._return(matches);
 
-        MethodSpec constructorMethod = constructorBuilder.build();
-
-        matcherClassBuilder.addMethod(constructorMethod);
-        matcherClassBuilder.addMethod(matchesSafelyMethod);
-        matcherClassBuilder.addMethod(descriptionToMethod);
-        matcherClassBuilder.addMethod(factoryMethod);
-        return matcherClassBuilder.build();
-    }
-
-    public Map<ClassName, String> buildStaticImports() {
-        return staticImports;
+        return codeModel;
     }
 
     private boolean isGetterMethod(Method method) {
