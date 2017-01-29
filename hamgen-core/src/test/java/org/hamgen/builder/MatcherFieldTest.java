@@ -9,6 +9,7 @@ import org.hamcrest.Matcher;
 import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -261,90 +262,115 @@ public class MatcherFieldTest {
         assertEquals(expected, generableToString(result));
     }
 
-    /*@Test
+    @Test
     public void t0411_buildMatcherListString() throws Exception {
         //Arrange
+        JCodeModel codeModel = new JCodeModel();
         MatcherField matcherField = new MatcherField();
         matcherField.setName("myList");
         matcherField.setGetterName("getMyList");
         matcherField.setType(this.getClass().getMethod("getList").getGenericReturnType());
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
-        String expected = "java.util.List<java.lang.String> items = expected.getMyList();\n" +
-                "if (items == null) {\n" +
-                "  this.myListMatcher = nullValue();\n" +
-                "} else {\n" +
-                "  java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
-                "  for (java.lang.String item : items) {\n" +
-                "    org.hamcrest.Matcher matcher = item == null ||item.isEmpty() ? isEmptyOrNullString() : is(item);\n" +
-                "    matchers.add(matcher);\n" +
-                "  }\n" +
-                "  this.myListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
-                "}\n";
+        JBlock constructorBlock = new JBlock();
+        CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
+        JVar matcherJVar = testDataBuilder.buildJVar(Matcher.class, "myListMatcher");
+        JVar expectedJVar = testDataBuilder.buildJVar(ArrayList.class, PARAM_NAME_EXPECTED);
+
+        String expected =
+                "{\r\n" +
+                        "    java.util.List<java.lang.String> items = expected.getMyList();\r\n" +
+                        "    if (items == null) {\r\n" +
+                        "        myListMatcher = org.hamcrest.Matchers.nullValue();\r\n" +
+                        "    } else {\r\n" +
+                        "        java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<org.hamcrest.Matcher>();\r\n" +
+                        "        for (java.lang.String item: items) {\r\n" +
+                        "            org.hamcrest.Matcher itemMatcher = (((item == null)||item.isEmpty())?org.hamcrest.Matchers.isEmptyOrNullString():org.hamcrest.Matchers.is(item));\r\n" +
+                        "            matchers.add(itemMatcher);\r\n" +
+                        "        }\r\n" +
+                        "        myListMatcher = org.hamcrest.Matcher.contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()] ));\r\n" +
+                        "    }\r\n" +
+                        "}";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        JBlock result = matcherFieldBuilder.buildMatcherInitialization(constructorBlock, matcherJVar, expectedJVar, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
-        assertEquals(expected, result.toString());
+        assertEquals(expected, generableToString(result));
     }
 
     @Test
     public void t0412_buildMatcherListComplexType() throws Exception {
         //Arrange
+        JCodeModel codeModel = new JCodeModel();
         MatcherField matcherField = new MatcherField();
         matcherField.setName("myList");
         matcherField.setGetterName("getMyList");
         matcherField.setType(this.getClass().getMethod("getSomething").getGenericReturnType());
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
-        String expected = "java.util.List<org.hamgen.testdata.MatcherBuilderTestDataSomething> items = expected.getMyList();\n" +
-                "if (items == null) {\n" +
-                "  this.myListMatcher = nullValue();\n" +
-                "} else {\n" +
-                "  java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
-                "  for (org.hamgen.testdata.MatcherBuilderTestDataSomething item : items) {\n" +
-                "    org.hamcrest.Matcher matcher = item == null ? nullValue() : isMatcherBuilderTestDataSomething(item);\n" +
-                "    matchers.add(matcher);\n" +
-                "  }\n" +
-                "  this.myListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
-                "}\n";
+        JBlock constructorBlock = new JBlock();
+        CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
+        JVar matcherJVar = testDataBuilder.buildJVar(Matcher.class, "myListMatcher");
+        JVar expectedJVar = testDataBuilder.buildJVar(ArrayList.class, PARAM_NAME_EXPECTED);
+
+        String expected = "{\r\n" +
+                "    java.util.List<org.hamgen.testdata.MatcherBuilderTestDataSomething> items = expected.getMyList();\r\n" +
+                "    if (items == null) {\r\n" +
+                "        myListMatcher = org.hamcrest.Matchers.nullValue();\r\n" +
+                "    } else {\r\n" +
+                "        java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<org.hamcrest.Matcher>();\r\n" +
+                "        for (org.hamgen.testdata.MatcherBuilderTestDataSomething item: items) {\r\n" +
+                "            org.hamcrest.Matcher itemMatcher = ((item == null)?org.hamcrest.Matchers.nullValue():org.hamgen.testdata.matcher.MatcherBuilderTestDataSomethingMatcher.isMatcherBuilderTestDataSomething(item));\r\n" +
+                "            matchers.add(itemMatcher);\r\n" +
+                "        }\r\n" +
+                "        myListMatcher = org.hamcrest.Matcher.contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()] ));\r\n" +
+                "    }\r\n" +
+                "}";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        JBlock result = matcherFieldBuilder.buildMatcherInitialization(constructorBlock, matcherJVar, expectedJVar, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
-        assertEquals(expected, result.toString());
+        assertEquals(expected, generableToString(result));
     }
 
     @Test
     public void t0413_buildMatcherListDouble() throws Exception {
         //Arrange
+        JCodeModel codeModel = new JCodeModel();
         MatcherField matcherField = new MatcherField();
         matcherField.setName("myList");
         matcherField.setGetterName("getMyList");
         matcherField.setType(this.getClass().getMethod("getDouble").getGenericReturnType());
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
-        String expected = "java.util.List<java.lang.Double> items = expected.getMyList();\n" +
-                "if (items == null) {\n" +
-                "  this.myListMatcher = nullValue();\n" +
-                "} else {\n" +
-                "  java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<>();\n" +
-                "  for (java.lang.Double item : items) {\n" +
-                "    org.hamcrest.Matcher matcher = is(item);\n" +
-                "    matchers.add(matcher);\n" +
-                "  }\n" +
-                "  this.myListMatcher = contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()]));\n" +
-                "}\n";
+        JBlock constructorBlock = new JBlock();
+        CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
+        JVar matcherJVar = testDataBuilder.buildJVar(Matcher.class, "myListMatcher");
+        JVar expectedJVar = testDataBuilder.buildJVar(ArrayList.class, PARAM_NAME_EXPECTED);
+
+        String expected = "{\r\n" +
+                "    java.util.List<java.lang.Double> items = expected.getMyList();\r\n" +
+                "    if (items == null) {\r\n" +
+                "        myListMatcher = org.hamcrest.Matchers.nullValue();\r\n" +
+                "    } else {\r\n" +
+                "        java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<org.hamcrest.Matcher>();\r\n" +
+                "        for (java.lang.Double item: items) {\r\n" +
+                "            org.hamcrest.Matcher itemMatcher = org.hamcrest.Matchers.is(item);\r\n" +
+                "            matchers.add(itemMatcher);\r\n" +
+                "        }\r\n" +
+                "        myListMatcher = org.hamcrest.Matcher.contains(matchers.toArray(new org.hamcrest.Matcher[matchers.size()] ));\r\n" +
+                "    }\r\n" +
+                "}";
 
         //Act
-        CodeBlock result = matcherFieldBuilder.buildMatcherInitialization(PARAM_NAME_EXPECTED, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
+        JBlock result = matcherFieldBuilder.buildMatcherInitialization(constructorBlock, matcherJVar, expectedJVar, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
 
         //Assert
-        assertEquals(expected, result.toString());
+        assertEquals(expected, generableToString(result));
     }
-*/
+
     // used by t0411
     public List<String> getList() {
         return Collections.emptyList();

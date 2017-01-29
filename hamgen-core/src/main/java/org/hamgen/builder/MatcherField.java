@@ -1,6 +1,7 @@
 package org.hamgen.builder;
 
 import com.sun.codemodel.*;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamgen.log.Logger;
 import org.hamgen.util.StringUtil;
@@ -64,10 +65,10 @@ public class MatcherField {
     }
 
     public Class<?> getTypeClass() {
-        if(type instanceof ParameterizedType) {
-            return (Class)((ParameterizedType) type).getRawType();
+        if (type instanceof ParameterizedType) {
+            return (Class) ((ParameterizedType) type).getRawType();
         }
-        return (Class)type;
+        return (Class) type;
     }
 
     public void setType(Type type) {
@@ -158,24 +159,23 @@ public class MatcherField {
 
         // todo refactor this mess
         public JBlock buildMatcherInitialization(JBlock constructorBody, JVar matcher, JVar expected, String matcherPreFix, String packagePostFix) {
-            JClass matchers = codeModel.ref(Matchers.class);
-            JInvocation invokeMatcherIs = matchers.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
+            JClass matchersClazz = codeModel.ref(Matchers.class);
+            JInvocation invokeMatcherIs = matchersClazz.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
 
             JExpression assignmentExpression;
 
             if (matcherField.getType() == String.class) {
                 JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null()).cor(expected.invoke(matcherField.getGetterName()).invoke("isEmpty"));
-                JInvocation invokeMatcherIsEmptyOrNullString = matchers.staticInvoke("isEmptyOrNullString");
+                JInvocation invokeMatcherIsEmptyOrNullString = matchersClazz.staticInvoke("isEmptyOrNullString");
                 assignmentExpression = JOp.cond(condition, invokeMatcherIsEmptyOrNullString, invokeMatcherIs);
             } else if (matcherField.getTypeClass().isPrimitive() || ClassUtil.isPrimitiveWrapper(matcherField.getTypeClass()) || matcherField.getTypeClass().isEnum()) {
                 assignmentExpression = invokeMatcherIs;
-            } else if(Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
-                assignmentExpression = invokeMatcherIs;
-//                return buildCollectionMatcher(matcherPreFix, packagePostFix);
+            } else if (Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
+                return buildCollectionMatcher(constructorBody, matcher, expected, matcherPreFix, packagePostFix);
             } else {
                 // Assume a matcher is generated for the type
                 JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
-                JInvocation invokeMatcherNullValue = matchers.staticInvoke("nullValue");
+                JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke("nullValue");
 
                 String generatedMatcherName = matcherField.getTypeClass().getPackage().getName() + packagePostFix + "." + matcherField.getTypeClass().getSimpleName() + matcherField.getFieldPostFix();
                 String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
@@ -187,6 +187,61 @@ public class MatcherField {
             return constructorBody.assign(matcher, assignmentExpression);
         }
 
+        private JBlock buildCollectionMatcher(JBlock constructorBody, JVar matcher, JVar expected, String matcherPreFix, String packagePostFix) {
+            JClass matchersClazz = codeModel.ref(Matchers.class);
+            JClass matcherClazz = codeModel.ref(Matcher.class);
+
+            ParameterizedType parameterizedType = (ParameterizedType) matcherField.getType();
+            Type collectionType = parameterizedType.getActualTypeArguments()[0];
+            Class<?> collectionClass = (Class<?>) collectionType;
+
+            JClass rawListClazz = codeModel.ref(List.class);
+            JClass genericClazz = codeModel.ref(collectionClass);
+            JClass itemsListClazz = rawListClazz.narrow(genericClazz);
+            JVar itemsList = constructorBody.decl(itemsListClazz, "items", expected.invoke(matcherField.getGetterName()));
+
+            JConditional isListNull = constructorBody._if(itemsList.eq(JExpr._null()));
+            isListNull._then().assign(matcher, matchersClazz.staticInvoke("nullValue"));
+            JBlock listNotEmptyBlock = isListNull._else();
+
+            JClass matcherListClazz = rawListClazz.narrow(matcherClazz);
+            JClass arrayListClass = codeModel.ref(ArrayList.class).narrow(matcherClazz);
+            JVar matchersList = listNotEmptyBlock.decl(matcherListClazz, "matchers", JExpr._new(arrayListClass));
+
+            JForEach itemLoop = listNotEmptyBlock.forEach(genericClazz, "item", itemsList);
+            JVar item = itemLoop.var();
+            JBlock itemLoopBlock = itemLoop.body();
+            JInvocation invokeMatcherIs = matchersClazz.staticInvoke("is").arg(item);
+
+            JExpression matcherInitialization;
+            if (collectionType == String.class) {
+//                item == null ||item.isEmpty() ? isEmptyOrNullString() : is(item)", Matcher.class);
+                JExpression condition = item.eq(JExpr._null()).cor(item.invoke("isEmpty"));
+                JInvocation invokeMatcherIsEmptyOrNullString = matchersClazz.staticInvoke("isEmptyOrNullString");
+                matcherInitialization = JOp.cond(condition, invokeMatcherIsEmptyOrNullString, invokeMatcherIs);
+            } else if (collectionClass.isPrimitive() || ClassUtil.isPrimitiveWrapper(collectionClass) || collectionClass.isEnum()) {
+                //builder.addStatement("$T matcher = is(item)", Matcher.class);
+                matcherInitialization = invokeMatcherIs;
+            } else {
+                //builder.addStatement("$T matcher = item == null ? nullValue() : is$N(item)", Matcher.class, collectionClass.getSimpleName());
+                JExpression condition = item.eq(JExpr._null());
+                JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke("nullValue");
+
+                String generatedMatcherName = collectionClass.getPackage().getName() + packagePostFix + "." + collectionClass.getSimpleName() + matcherField.getFieldPostFix();
+                String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(collectionClass.getSimpleName());
+                JClass generatedMatcherClass = codeModel.ref(generatedMatcherName);
+                JInvocation invokeGeneratedMatcher = generatedMatcherClass.staticInvoke(generatedMatcherFactoryName).arg(item);
+
+                matcherInitialization = JOp.cond(condition, invokeMatcherNullValue, invokeGeneratedMatcher);
+            }
+            JVar itemMatcher = itemLoopBlock.decl(matcherClazz, "itemMatcher", matcherInitialization);
+            itemLoopBlock.add(matchersList.invoke("add").arg(itemMatcher));
+
+            listNotEmptyBlock.assign(matcher, matcherClazz.staticInvoke("contains").arg(matchersList.invoke("toArray").arg(JExpr.newArray(matcherClazz, matchersList.invoke("size")))));
+
+            return constructorBody;
+        }
+
         /*private CodeBlock buildCollectionMatcher(String matcherPreFix, String packagePostFix) {
             CodeBlock.Builder builder = CodeBlock.builder();
 
@@ -195,6 +250,7 @@ public class MatcherField {
             Class<?> collectionClass = (Class<?>) collectionType;
 
             builder.addStatement("$T<$T> items = expected.$N()", List.class, collectionClass, matcherField.getGetterName());
+
             builder.beginControlFlow("if (items == null)");
             builder.addStatement("this.$N = nullValue()", matcherField.getName());
             builder.nextControlFlow("else");
