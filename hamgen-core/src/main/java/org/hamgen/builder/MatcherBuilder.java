@@ -108,7 +108,7 @@ public class MatcherBuilder {
         JBlock matchtSafelyBody = matchesSafely.body();
         JVar itemParam = matchesSafely.param(Object.class, PARAM_NAME_ACTUAL_ITEM);
         JVar mismatchDescriptionParam = matchesSafely.param(Description.class, PARAM_NAME_MISMATCH_DESCRIPTION);
-        JVar actual = matchtSafelyBody.decl(originalClass, originalClassName, JExpr.cast(originalClass, itemParam));
+        JVar actual = matchtSafelyBody.decl(originalClass, "actual", JExpr.cast(originalClass, itemParam));
         JVar matches = matchtSafelyBody.decl(codeModel.BOOLEAN, "matches", TRUE);
         matchtSafelyBody.invoke(mismatchDescriptionParam, "appendText").arg("{");
 
@@ -123,8 +123,8 @@ public class MatcherBuilder {
         for (MatcherField matcherField : matcherFields) {
             MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
-            JFieldVar matcher = matcherFieldBuilder.buildFieldSpec(matcherClass, hamcrestMatcherClass);
-            matcherFieldBuilder.buildMatcherInitialization(constructorBody, matcher, expectedItemParam, matcherPreFix, packagePostFix);
+            JFieldVar matcher = matcherFieldBuilder.buildFieldSpec(matcherClass);
+            matcherFieldBuilder.buildMatcherInitialization(constructorBody, matcher, constructorParameterExpectedItem, matcherPreFix, packagePostFix);
             matcherFieldBuilder.buildMatchesSafely(matchtSafelyBody, matcher, actual, matches, mismatchDescriptionParam, hamcrestMatcherClass);
             matcherFieldBuilder.buildDescribeTo(describeToBody, descriptionParam, matcher, firstField);
 

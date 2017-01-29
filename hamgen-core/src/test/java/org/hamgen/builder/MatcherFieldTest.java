@@ -7,15 +7,16 @@ import org.hamgen.testdata.MatcherBuilderTestDataMyEnum;
 import org.hamgen.testdata.MatcherBuilderTestDataSomething;
 import org.hamcrest.Matcher;
 import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
+import org.hamgen.testtools.CodeModelTestDataBuilder;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamgen.matcher.MatcherFieldMatcher.isMatcherField;
+import static org.hamgen.testtools.matcher.MatcherFieldMatcher.isMatcherField;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamgen.util.CodeModelUtil.generableToString;
+import static org.hamgen.testtools.CodeModelUtil.generableToString;
 import static org.junit.Assert.assertEquals;
 
 public class MatcherFieldTest {

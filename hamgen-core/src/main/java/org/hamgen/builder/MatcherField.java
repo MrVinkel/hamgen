@@ -137,8 +137,9 @@ public class MatcherField {
             return new MatcherField(matcherField.getGetterName(), matcherField.getOrigName(), matcherField.fieldPostFix, matcherField.getType());
         }
 
-        public JFieldVar buildFieldSpec(JDefinedClass matcherClass, JClass hamcrestMatcherClass) {
-            return matcherClass.field(Modifier.PROTECTED, hamcrestMatcherClass, matcherField.getName());
+        public JFieldVar buildFieldSpec(JDefinedClass matcherClass) {
+            JClass matcherClazz = codeModel.ref(Matcher.class);
+            return matcherClass.field(Modifier.PROTECTED, matcherClazz, matcherField.getName());
         }
 
         public JBlock buildDescribeTo(JBlock describeToBody, JVar descriptionParam, JVar matcher, boolean first) {

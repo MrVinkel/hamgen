@@ -1,4 +1,4 @@
-package org.hamgen.builder;
+package org.hamgen.testtools;
 
 import com.sun.codemodel.*;
 
