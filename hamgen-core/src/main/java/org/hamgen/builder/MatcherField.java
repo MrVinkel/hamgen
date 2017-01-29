@@ -238,7 +238,7 @@ public class MatcherField {
             JVar itemMatcher = itemLoopBlock.decl(matcherClazz, "itemMatcher", matcherInitialization);
             itemLoopBlock.add(matchersList.invoke("add").arg(itemMatcher));
 
-            listNotEmptyBlock.assign(matcher, matcherClazz.staticInvoke("contains").arg(matchersList.invoke("toArray").arg(JExpr.newArray(matcherClazz, matchersList.invoke("size")))));
+            listNotEmptyBlock.assign(matcher, matchersClazz.staticInvoke("contains").arg(matchersList.invoke("toArray").arg(JExpr.newArray(matcherClazz, matchersList.invoke("size")))));
 
             return constructorBody;
         }

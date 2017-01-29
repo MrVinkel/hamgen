@@ -285,7 +285,7 @@ public class MatcherBuilderTest {
                         "                Matcher itemMatcher = ((item == null)?Matchers.nullValue():MatcherBuilderTestDataSomethingElseMatcher.isMatcherBuilderTestDataSomethingElse(item));\r\n" +
                         "                matchers.add(itemMatcher);\r\n" +
                         "            }\r\n" +
-                        "            someListMatcher = Matcher.contains(matchers.toArray(new Matcher[matchers.size()] ));\r\n" +
+                        "            someListMatcher = Matchers.contains(matchers.toArray(new Matcher[matchers.size()] ));\r\n" +
                         "        }\r\n" +
                         "    }\r\n" +
                         "\r\n" +

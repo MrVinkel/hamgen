@@ -74,7 +74,7 @@ public class Generate extends AbstractMojo {
             properties.setProperty(OUTPUT_DIR, outputDirectory);
             properties.setProperty(FAIL_ON_NO_CLASSES_FOUND, Boolean.toString(failOnNoClassesFound));
 
-            Collection<Class<?>> classes = new ArrayList<>();
+            Collection<Class<?>> classes = new ArrayList<Class<?>>();
 
             if(annotation != null && !annotation.isEmpty()) {
                 properties.setProperty(ANNOTATION, annotation);
