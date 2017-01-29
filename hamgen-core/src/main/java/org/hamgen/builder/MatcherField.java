@@ -157,7 +157,7 @@ public class MatcherField {
         }
 
         // todo refactor this mess
-        public JBlock buildMatcherInitialization(JBlock constructorBody, JVar matcher, JVar expected) {
+        public JBlock buildMatcherInitialization(JBlock constructorBody, JVar matcher, JVar expected, String matcherPreFix, String packagePostFix) {
             JClass matchers = codeModel.ref(Matchers.class);
             JInvocation invokeMatcherIs = matchers.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
 
@@ -168,17 +168,21 @@ public class MatcherField {
                 JInvocation invokeMatcherIsEmptyOrNullString = matchers.staticInvoke("isEmptyOrNullString");
                 assignmentExpression = JOp.cond(condition, invokeMatcherIsEmptyOrNullString, invokeMatcherIs);
             } else if (matcherField.getTypeClass().isPrimitive() || ClassUtil.isPrimitiveWrapper(matcherField.getTypeClass()) || matcherField.getTypeClass().isEnum()) {
-                //todo make this the default assignmentExpression
                 assignmentExpression = invokeMatcherIs;
             } else if(Collection.class.isAssignableFrom(matcherField.getTypeClass())) {
-                assignmentExpression = null;
+                assignmentExpression = invokeMatcherIs;
 //                return buildCollectionMatcher(matcherPreFix, packagePostFix);
             } else {
-                // todo make this explicit if
                 // Assume a matcher is generated for the type
                 JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
                 JInvocation invokeMatcherNullValue = matchers.staticInvoke("nullValue");
-                assignmentExpression = JOp.cond(condition, invokeMatcherNullValue, invokeMatcherIs);
+
+                String generatedMatcherName = matcherField.getTypeClass().getPackage().getName() + packagePostFix + "." + matcherField.getTypeClass().getSimpleName() + matcherField.getFieldPostFix();
+                String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
+                JClass generatedMatcherClass = codeModel.ref(generatedMatcherName);
+                JInvocation invokeGeneratedMatcher = generatedMatcherClass.staticInvoke(generatedMatcherFactoryName).arg(expected.invoke(matcherField.getGetterName()));
+
+                assignmentExpression = JOp.cond(condition, invokeMatcherNullValue, invokeGeneratedMatcher);
             }
             return constructorBody.assign(matcher, assignmentExpression);
         }

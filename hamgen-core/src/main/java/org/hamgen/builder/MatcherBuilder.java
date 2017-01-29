@@ -124,7 +124,7 @@ public class MatcherBuilder {
             MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
             JFieldVar matcher = matcherFieldBuilder.buildFieldSpec(matcherClass, hamcrestMatcherClass);
-            matcherFieldBuilder.buildMatcherInitialization(constructorBody, matcher, expectedItemParam);
+            matcherFieldBuilder.buildMatcherInitialization(constructorBody, matcher, expectedItemParam, matcherPreFix, packagePostFix);
             matcherFieldBuilder.buildMatchesSafely(matchtSafelyBody, matcher, actual, matches, mismatchDescriptionParam, hamcrestMatcherClass);
             matcherFieldBuilder.buildDescribeTo(describeToBody, descriptionParam, matcher, firstField);
 
