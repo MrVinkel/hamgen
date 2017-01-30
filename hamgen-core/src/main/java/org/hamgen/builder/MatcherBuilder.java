@@ -5,6 +5,7 @@ import org.hamcrest.*;
 import org.hamgen.HamGenDiagnosingMatcher;
 import org.hamgen.log.Logger;
 import org.hamgen.HamProperties;
+import org.hamgen.model.MatcherField;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -121,7 +122,7 @@ public class MatcherBuilder {
 
         boolean firstField = true;
         for (MatcherField matcherField : matcherFields) {
-            MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+            MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
             JFieldVar matcher = matcherFieldBuilder.buildFieldSpec(matcherClass);
             matcherFieldBuilder.buildMatcherInitialization(constructorBody, matcher, constructorParameterExpectedItem, matcherPreFix, packagePostFix);

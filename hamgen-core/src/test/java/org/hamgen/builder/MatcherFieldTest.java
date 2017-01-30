@@ -3,6 +3,7 @@ package org.hamgen.builder;
 import com.sun.codemodel.*;
 import org.hamcrest.Description;
 import org.hamgen.HamProperties;
+import org.hamgen.model.MatcherField;
 import org.hamgen.testdata.MatcherBuilderTestDataMyEnum;
 import org.hamgen.testdata.MatcherBuilderTestDataSomething;
 import org.hamcrest.Matcher;
@@ -10,6 +11,7 @@ import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.hamgen.testtools.CodeModelTestDataBuilder;
 import org.junit.Test;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,11 +30,7 @@ public class MatcherFieldTest {
     @Test
     public void t0401_matcherField() {
         //Arrange
-        MatcherField expected = new MatcherField();
-        expected.setName("something");
-        expected.setGetterName("getSomething");
-        expected.setFieldPostFix("Match");
-        expected.setType(String.class);
+        MatcherField expected = new MatcherField("getSomething", "something", "Match", String.class);
 
         //Act
         MatcherField result = MatcherField.builder(String.class, "getSomething")
@@ -46,11 +44,7 @@ public class MatcherFieldTest {
     @Test
     public void t0402_DefaultPostFix() {
         //Arrange
-        MatcherField expected = new MatcherField();
-        expected.setName("something");
-        expected.setGetterName("getSomething");
-        expected.setFieldPostFix(HamProperties.Key.MATCHER_POST_FIX.getDefaultValue());
-        expected.setType(String.class);
+        MatcherField expected = new MatcherField("getSomething", "something", HamProperties.Key.MATCHER_POST_FIX.getDefaultValue(), String.class);
 
         //Act
         MatcherField result = MatcherField.builder(String.class, "getSomething").build();
@@ -62,11 +56,7 @@ public class MatcherFieldTest {
     @Test
     public void t0403_nullValues() {
         //Arrange
-        MatcherField expected = new MatcherField();
-        expected.setName(null);
-        expected.setGetterName(null);
-        expected.setFieldPostFix(null);
-        expected.setType(null);
+        MatcherField expected = new MatcherField(null, null, null, null);
 
         //Act
         MatcherField result = MatcherField.builder(null, null)
@@ -80,11 +70,7 @@ public class MatcherFieldTest {
     @Test
     public void t0403_MatcherAsArgument() {
         //Arrange
-        MatcherField expected = new MatcherField();
-        expected.setName("something");
-        expected.setGetterName("getSomething");
-        expected.setFieldPostFix("Match");
-        expected.setType(String.class);
+        MatcherField expected = new MatcherField("getSomething", "something", "Match", String.class);
 
         //Act
         MatcherField result = MatcherField.builder(expected).build();
@@ -96,12 +82,8 @@ public class MatcherFieldTest {
     @Test
     public void t0404_buildDescriptionToFirstMatcher() throws Exception {
         //Arrange
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("something");
-        matcherField.setGetterName("getSomething");
-        matcherField.setFieldPostFix("Match");
-        matcherField.setType(String.class);
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+        MatcherField matcherField = new MatcherField("getSomething", "something", "Match", String.class);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField);
 
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(new JCodeModel());
         JBlock describeToBody = new JBlock();
@@ -124,12 +106,8 @@ public class MatcherFieldTest {
     @Test
     public void t0405_buildDescriptionToNotFirstMatcher() throws Exception {
         //Arrange
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("something");
-        matcherField.setGetterName("getSomething");
-        matcherField.setFieldPostFix("Match");
-        matcherField.setType(String.class);
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField);
+        MatcherField matcherField = new MatcherField("getSomething", "something", "Match", String.class);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField);
 
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(new JCodeModel());
         JBlock describeToBody = new JBlock();
@@ -154,12 +132,8 @@ public class MatcherFieldTest {
     public void t0406_buildMatcherInitializationString() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("something");
-        matcherField.setGetterName("getSomething");
-        matcherField.setFieldPostFix("Match");
-        matcherField.setType(String.class);
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        MatcherField matcherField = new MatcherField("getSomething", "something", "Match", String.class);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
@@ -183,12 +157,8 @@ public class MatcherFieldTest {
     public void t0407_buildMatcherInitializationSimpleTypes() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("something");
-        matcherField.setGetterName("getSomething");
-        matcherField.setFieldPostFix("Match");
-        matcherField.setType(double.class);
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        MatcherField matcherField = new MatcherField("getSomething", "something", "Match", double.class);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
@@ -211,12 +181,8 @@ public class MatcherFieldTest {
     public void t0408_buildMatcherInitializationOtherTypes() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("somethingElse");
-        matcherField.setGetterName("getSomethingElse");
-        matcherField.setFieldPostFix("Match");
-        matcherField.setType(MatcherBuilderTestDataSomethingElse.class);
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        MatcherField matcherField = new MatcherField("getSomethingElse", "somethingElse", "Match", MatcherBuilderTestDataSomethingElse.class);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
@@ -239,12 +205,8 @@ public class MatcherFieldTest {
     public void t0410_buildMatcherInitializationEnum() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("myEnum");
-        matcherField.setGetterName("getMyEnum");
-        matcherField.setFieldPostFix("Match");
-        matcherField.setType(MatcherBuilderTestDataMyEnum.class);
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        MatcherField matcherField = new MatcherField("getMyEnum", "myEnum", "Match", MatcherBuilderTestDataMyEnum.class);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
@@ -267,11 +229,9 @@ public class MatcherFieldTest {
     public void t0411_buildMatcherListString() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("myList");
-        matcherField.setGetterName("getMyList");
-        matcherField.setType(this.getClass().getMethod("getList").getGenericReturnType());
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        Type listType = this.getClass().getMethod("getList").getGenericReturnType();
+        MatcherField matcherField = new MatcherField("getMyList", "myList", "Match", listType);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
@@ -304,11 +264,9 @@ public class MatcherFieldTest {
     public void t0412_buildMatcherListComplexType() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("myList");
-        matcherField.setGetterName("getMyList");
-        matcherField.setType(this.getClass().getMethod("getSomething").getGenericReturnType());
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        Type listType = this.getClass().getMethod("getSomething").getGenericReturnType();
+        MatcherField matcherField = new MatcherField("getMyList", "myList", "Matcher", listType);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
@@ -340,11 +298,9 @@ public class MatcherFieldTest {
     public void t0413_buildMatcherListDouble() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField();
-        matcherField.setName("myList");
-        matcherField.setGetterName("getMyList");
-        matcherField.setType(this.getClass().getMethod("getDouble").getGenericReturnType());
-        MatcherField.Builder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
+        Type listType = this.getClass().getMethod("getDouble").getGenericReturnType();
+        MatcherField matcherField = new MatcherField("getMyList", "myList", "Match", listType);
+        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
 
         JBlock constructorBlock = new JBlock();
         CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);

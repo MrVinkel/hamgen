@@ -1,7 +1,7 @@
 package org.hamgen.testtools.matcher;
 
 import org.hamgen.HamGenDiagnosingMatcher;
-import org.hamgen.builder.MatcherField;
+import org.hamgen.model.MatcherField;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
