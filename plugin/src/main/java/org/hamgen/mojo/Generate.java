@@ -28,7 +28,7 @@ public class Generate extends AbstractMojo {
      * Package name to scan through
      */
     @Parameter(required = true)
-    private String packageName;
+    private List<String> packageNames;
 
     /**
      * Annotation to scan for - E.g: javax.xml.bind.annotation.XmlType
@@ -69,7 +69,6 @@ public class Generate extends AbstractMojo {
 
         try {
             HamProperties properties = new HamProperties();
-            properties.setProperty(PACKAGE_NAME, packageName);
 
             properties.setProperty(OUTPUT_DIR, outputDirectory);
             properties.setProperty(FAIL_ON_NO_CLASSES_FOUND, Boolean.toString(failOnNoClassesFound));
@@ -79,7 +78,7 @@ public class Generate extends AbstractMojo {
             if(annotation != null && !annotation.isEmpty()) {
                 properties.setProperty(ANNOTATION, annotation);
                 ReflectiveClassFinder classFinder = new ReflectiveClassFinder();
-                classes.addAll(classFinder.findClassesWithAnnotation(properties.getProperty(PACKAGE_NAME, PACKAGE_NAME.getDefaultValue()), properties.getProperty(ANNOTATION, ANNOTATION.getDefaultValue())));
+                classes.addAll(classFinder.findClassesWithAnnotation(packageNames, properties.getProperty(ANNOTATION, ANNOTATION.getDefaultValue())));
             }
 
             if(classNames != null && classNames.size() > 0) {

@@ -39,7 +39,6 @@ public class HamProperties extends Properties {
 
     public enum Key {
         OUTPUT_DIR("outputdir", "target/generate-sources"),
-        PACKAGE_NAME("packagename", null),
         ANNOTATION("annotation", null),
         FAIL_ON_NO_CLASSES_FOUND("failOnNoClasses", "true"),
         PACKAGE_POST_FIX("packagepostfix", ".matcher"),

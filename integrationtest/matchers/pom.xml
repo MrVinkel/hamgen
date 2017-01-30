@@ -44,7 +44,9 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <packageName>org.hamgen.integrationtest.schemapackage</packageName>
+                            <packageNames>
+                                <packageName>org.hamgen.integrationtest.schemapackage</packageName>
+                            </packageNames>
                             <outputDir>${project.build.directory}/generated-test-sources/hamgen</outputDir>
                             <annotation>javax.xml.bind.annotation.XmlType</annotation>
                         </configuration>
