@@ -12,10 +12,6 @@ public class MatcherField {
     private Type type;
     private String fieldPostFix = HamProperties.Key.MATCHER_POST_FIX.getDefaultValue();
 
-    MatcherField() {
-        //Use MatcherField.builder
-    }
-
     public MatcherField(String getterName, String name, String fieldPostFix, Type type) {
         this.getterName = getterName;
         this.name = name;
