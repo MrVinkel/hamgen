@@ -18,7 +18,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
 <dependency>
     <groupId>org.hamgen</groupId>
     <artifactId>hamgen-core</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 </dependency>
 <dependency>
     <groupId>org.hamcrest</groupId>
@@ -29,7 +29,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
 <plugin>
     <groupId>org.hamgen</groupId>
     <artifactId>hamgen-maven-plugin</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <executions>
         <execution>
             <id>generate-matchers</id>
@@ -38,8 +38,11 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
                 <goal>generate</goal>
             </goals>
             <configuration>
-                <outputDir>${project.build.directory}/generated-test-sources/hamgen</outputDir>
-                <packageName>org.hamgen.integrationtest.schemapackage</packageName>
+                <outputDirectory>${project.build.directory}/generated-test-sources/hamgen</outputDirectory>
+                <packageNames>
+                    <packageName>org.hamgen.integrationtest.schemapackage</packageName>
+                    <packageName>org.hamgen.other.package</packageName>
+                </packageNames>
                 <annotation>javax.xml.bind.annotation.XmlType</annotation>
                 <classNames>
                     <className>my.custom.class.without.annotation</className>
@@ -154,6 +157,14 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 
 * Support for matching collection lax
 * Verification of all nested matchers are generated
+
+### Bugs:
+
+* Missing support for BigDecimal
+* Missing support for BigInteger
+* Missing support for byte arrays byte[]
+* Missing support for XMLGregorianCalendar
+
 
 ## License
 -----------
