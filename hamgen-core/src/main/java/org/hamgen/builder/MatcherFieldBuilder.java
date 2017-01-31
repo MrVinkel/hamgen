@@ -92,6 +92,7 @@ public class MatcherFieldBuilder {
         return matcherSafelyBody;
     }
 
+    //todo this could be moved to MatcherBuilder
     public JBlock buildMatcherInitialization(JBlock constructorBody, JVar matcher, JVar expected, String matcherPreFix, String packagePostFix) {
         MatcherInitializationBuilder builder = MatcherInitializationBuilder.getBuilder(matcherField.getType());
         return builder.withCodeModel(codeModel)
