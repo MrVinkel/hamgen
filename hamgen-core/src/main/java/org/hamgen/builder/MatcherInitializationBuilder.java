@@ -62,6 +62,9 @@ public abstract class MatcherInitializationBuilder {
             return builders.get(type);
         } else if (((Class<?>) type).isEnum()) {
             return new EnumMatcherInitializationBuilder();
+        } else if(((Class<?>) type).isArray()) {
+            // NOT TESTED
+            return new PrimitiveTypesInitializationBuilder();
         } else {
             return new GeneratedClassesInitializationBuilder();
         }

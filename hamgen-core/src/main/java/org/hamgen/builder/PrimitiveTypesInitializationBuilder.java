@@ -13,19 +13,6 @@ import java.util.List;
 
 public class PrimitiveTypesInitializationBuilder extends MatcherInitializationBuilder {
 
-    static {
-        register(new PrimitiveTypesInitializationBuilder(),
-                Boolean.class, boolean.class,
-                Byte.class, byte.class,
-                Character.class, char.class,
-                Short.class, short.class,
-                Integer.class, int.class,
-                Long.class, long.class,
-                Double.class, double.class,
-                Float.class, float.class,
-                Void.class, void.class);
-    }
-
     @Override
     public List<Class<?>> getTypes() {
         List<Class<?>> types = new ArrayList<Class<?>>();
