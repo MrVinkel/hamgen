@@ -64,7 +64,7 @@ public abstract class MatcherInitializationBuilder {
             return new EnumMatcherInitializationBuilder();
         } else if(((Class<?>) type).isArray()) {
 //            return builders.get(Collection.class);
-            //Only works for primitive arrays
+            //todo only works for primitive arrays - should have a ArrayMatcherInitializationBuilder which checks for primitive type or handles them as a collection
             return new PrimitiveTypesInitializationBuilder();
         } else {
             return new GeneratedClassesInitializationBuilder();

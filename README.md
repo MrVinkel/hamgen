@@ -8,6 +8,9 @@ The generated matchers supports nesting of JAXB object and collections.
 
 I made this plugin due to being bored by writing my own matchers every time I had to test some code that returned large JAXB objects.
 
+Why not just use assertEquals you ask? Consider a generated class from a 3rd party without a equals method. You'll have to write multiple assertEquals or make your own equals method which would clutter the test code.
+Even when a model class has a equals method the TypeSafeDiagnosingMatcher produces a very nice 'easy to see what went wrong' output where it explicit teels you what was different in your multi layered model class with nested collections.
+
 Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06/how_hamcrest_can_save_your_sou/)
 
 ## Usage
@@ -54,7 +57,7 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
         <dependency>
             <groupId>my.dependency.to.scan</groupId>
             <artifactId>schemas</artifactId>
-            <version>1.0</version>
+            <version>1.2.3</version>
         </dependency>
     </dependencies>
 </plugin>
@@ -118,7 +121,7 @@ public class PersonNameStruct {
 }
 ```
 
-This has been generated without an equals method from some third party. Normally we would need three asserts to verify we had the correct person. Instead we kan now do this:
+This has been generated without an equals method from some 3rd party. Normally we would need three asserts to verify we had the correct person. Instead we kan now do this:
 ```java
 @Test
 public void testGetAPerson() throws Exception {
@@ -149,6 +152,7 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 ## Changelog
 -----------
 
+* 1.2 Rewrite to CodeModel - Replaced JavaPoet with CodeModel to support Java 1.6
 * 1.1 POJO matchers - Generate Hamcrest matchers for any POJO with getter methods
 * 1.0 Initial - Generate Hamcrest matchers for JAXB classes
 
@@ -157,14 +161,16 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 
 * Support for matching collection lax
 * Verification of all nested matchers are generated
+* List of classes to exclude (and rename classNames to includeClasses/excludeClasses)
+* Split up unit test and parametize some of them
 
 ### Bugs:
 
-* Missing support for BigDecimal
-* Missing support for BigInteger
-* Missing support for byte arrays byte[]
-* Missing support for XMLGregorianCalendar
-
+* Missing support for BigDecimal - Fixed in v1.3 needs unit testing
+* Missing support for BigInteger - Fixed in v1.3 needs unit testing
+* Missing support for XMLGregorianCalendar - Fixed in v1.3 needs unit testing
+* Missing support for byte arrays byte[] - Hacked, needs proper fix and testing
+* Wrong generation for inner classes - Done
 
 ## License
 -----------
