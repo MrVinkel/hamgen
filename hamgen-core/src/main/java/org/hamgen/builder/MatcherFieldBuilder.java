@@ -2,19 +2,14 @@ package org.hamgen.builder;
 
 import com.sun.codemodel.*;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamgen.HamProperties;
+import org.hamgen.builder.initialization.MatcherInitializationBuilder;
 import org.hamgen.log.Logger;
 import org.hamgen.model.MatcherField;
-import org.hamgen.util.ClassUtil;
 import org.hamgen.util.StringUtil;
 
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import static com.sun.codemodel.JExpr.FALSE;
 

@@ -24,6 +24,7 @@ public class MatcherBuilder {
     private static final String METHOD_NAME_DESCRIPTION_TO = "describeTo";
     private static final String METHOD_NAME_MATCHES_SAFELY = "matchesSafely";
 
+    private Class<?> originalClazz;
     private String originalClassName;
     private String matcherNamePostFix = HamProperties.Key.MATCHER_POST_FIX.getDefaultValue();
     private String originalPackageName;
@@ -32,16 +33,16 @@ public class MatcherBuilder {
     private List<MatcherField> matcherFields = new ArrayList<MatcherField>();
     private JCodeModel codeModel;
 
-    private MatcherBuilder(String originalPackageName, String originalClassName) {
-        this.originalPackageName = originalPackageName.trim();
-        this.originalClassName = originalClassName.trim();
+    public MatcherBuilder() {
         this.codeModel = new JCodeModel();
     }
 
-    public static MatcherBuilder matcherBuild(String packageName, String className) {
-        return new MatcherBuilder(packageName, className);
+    public MatcherBuilder withClass(Class<?> originalClazz) {
+        this.originalClazz = originalClazz;
+        this.originalPackageName = originalClazz.getPackage().getName().trim();
+        this.originalClassName = originalClazz.getSimpleName().trim();
+        return this;
     }
-
 
     public MatcherBuilder withMatcherPrefix(String matcherPreFix) {
         this.matcherPreFix = matcherPreFix.trim();
@@ -88,7 +89,7 @@ public class MatcherBuilder {
         // Create class
         String matcherName = originalClassName + matcherNamePostFix;
         String matcherPackage = originalPackageName + packagePostFix;
-        JClass originalClass = codeModel.ref(originalPackageName + "." + originalClassName);
+        JClass originalClass = codeModel.ref(originalClazz);
         JPackage packageName = codeModel._package(matcherPackage);
         JDefinedClass matcherClass = packageName._class(matcherName);
         matcherClass._extends(hamcrestMatcherClass);

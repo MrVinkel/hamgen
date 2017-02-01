@@ -32,7 +32,8 @@ public class HamcrestGenerator {
             }
 
             LOGGER.info("Building matcher for " + clazz.getName());
-            MatcherBuilder matcherClassBuilder = MatcherBuilder.matcherBuild(clazz.getPackage().getName(), clazz.getSimpleName())
+            MatcherBuilder matcherClassBuilder = new MatcherBuilder()
+                    .withClass(clazz)
                     .withMatcherPrefix(properties.getProperty(MATCHER_PRE_FIX))
                     .withMatcherNamePostfix(properties.getProperty(MATCHER_POST_FIX))
                     .withPackagePostFix(properties.getProperty(PACKAGE_POST_FIX))

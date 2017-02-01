@@ -1,4 +1,4 @@
-package org.hamgen.builder;
+package org.hamgen.builder.initialization;
 
 import com.sun.codemodel.*;
 import org.hamcrest.Matcher;

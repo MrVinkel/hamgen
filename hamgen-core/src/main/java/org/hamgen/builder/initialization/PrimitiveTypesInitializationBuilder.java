@@ -1,13 +1,10 @@
-package org.hamgen.builder;
+package org.hamgen.builder.initialization;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JExpression;
 import org.hamcrest.Matchers;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 

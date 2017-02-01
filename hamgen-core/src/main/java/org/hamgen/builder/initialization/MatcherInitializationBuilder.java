@@ -1,4 +1,4 @@
-package org.hamgen.builder;
+package org.hamgen.builder.initialization;
 
 import com.sun.codemodel.*;
 import org.hamgen.log.Logger;
@@ -63,7 +63,8 @@ public abstract class MatcherInitializationBuilder {
         } else if (((Class<?>) type).isEnum()) {
             return new EnumMatcherInitializationBuilder();
         } else if(((Class<?>) type).isArray()) {
-            // NOT TESTED
+//            return builders.get(Collection.class);
+            //Only works for primitive arrays
             return new PrimitiveTypesInitializationBuilder();
         } else {
             return new GeneratedClassesInitializationBuilder();

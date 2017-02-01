@@ -94,7 +94,8 @@ public class ReflectiveClassFinderTest {
         Collection<Class<?>> result = classFinder.findClassesWithAnnotation(packages, null);
 
         //Assert
-        Assert.assertEquals(4, result.size());
+        Assert.assertEquals(7, result.size());
+        // todo add the missing 3..
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(MatcherBuilderTestDataListSomething.class.getName()))));
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(MatcherBuilderTestDataSomething.class.getName()))));
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(MatcherBuilderTestDataSomethingElse.class.getName()))));

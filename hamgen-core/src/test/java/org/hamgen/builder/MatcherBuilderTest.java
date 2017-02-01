@@ -2,6 +2,7 @@
 package org.hamgen.builder;
 
 import com.sun.codemodel.JCodeModel;
+import com.test.TestClass;
 import org.hamgen.testdata.MatcherBuilderTestDataListSomething;
 import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.junit.Test;
@@ -53,7 +54,7 @@ public class MatcherBuilderTest {
                         "\r\n" +
                         "}\r\n";
         // Act
-        JCodeModel result = MatcherBuilder.matcherBuild("com.test", "TestClass").build();
+        JCodeModel result = new MatcherBuilder().withClass(TestClass.class).build();
 
         // Assert
         assertEquals(expected, codeModelToString(result));
@@ -101,7 +102,8 @@ public class MatcherBuilderTest {
                         "}\r\n";
 
         // Act
-        JCodeModel result = MatcherBuilder.matcherBuild("com.test", "TestClass")
+        JCodeModel result = new MatcherBuilder()
+                .withClass(TestClass.class)
                 .withMatcherNamePostfix("MyPost")
                 .withMatcherPrefix("MyPre")
                 .withPackagePostFix("My.Package")
@@ -154,7 +156,8 @@ public class MatcherBuilderTest {
                         "}\r\n";
 
         // Act
-        JCodeModel result = MatcherBuilder.matcherBuild("com.test", "TestClass")
+        JCodeModel result = new MatcherBuilder()
+                .withClass(TestClass.class)
                 .withMatcherNamePostfix("MyPost")
                 .withMatcherPrefix("MyPre")
                 .withPackagePostFix(".My.Package")
@@ -169,16 +172,16 @@ public class MatcherBuilderTest {
     public void t0203_WithFields() throws Exception {
         // Arrange
         String expected =
-                "-----------------------------------com.test.matcher.MatcherBuilderTestDataSomethingElseMatcher.java-----------------------------------\r\n" +
+                "-----------------------------------org.hamgen.testdata.matcher.MatcherBuilderTestDataSomethingElseMatcher.java-----------------------------------\r\n" +
                         "\r\n" +
-                        "package com.test.matcher;\r\n" +
+                        "package org.hamgen.testdata.matcher;\r\n" +
                         "\r\n" +
-                        "import com.test.MatcherBuilderTestDataSomethingElse;\r\n" +
                         "import org.hamcrest.Description;\r\n" +
                         "import org.hamcrest.Factory;\r\n" +
                         "import org.hamcrest.Matcher;\r\n" +
                         "import org.hamcrest.Matchers;\r\n" +
                         "import org.hamgen.HamGenDiagnosingMatcher;\r\n" +
+                        "import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;\r\n" +
                         "\r\n" +
                         "public class MatcherBuilderTestDataSomethingElseMatcher\r\n" +
                         "    extends HamGenDiagnosingMatcher\r\n" +
@@ -238,7 +241,8 @@ public class MatcherBuilderTest {
         // Act
         //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
         //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
-        MatcherBuilder matcherBuilder = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestDataSomethingElse")
+        MatcherBuilder matcherBuilder = new MatcherBuilder()
+                .withClass(MatcherBuilderTestDataSomethingElse.class)
                 .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethod("myRandomFunction"),
                         MatcherBuilderTestDataSomethingElse.class.getMethod("getMyEnum"),
                         MatcherBuilderTestDataSomethingElse.class.getMethod("getMySecondField"),
@@ -254,20 +258,19 @@ public class MatcherBuilderTest {
     public void t0204_ListField() throws Exception {
         // Arrange
         String expected =
-                "-----------------------------------com.test.matcher.MatcherBuilderTestDataListSomethingMatcher.java-----------------------------------\r\n" +
+                "-----------------------------------org.hamgen.testdata.matcher.MatcherBuilderTestDataListSomethingMatcher.java-----------------------------------\r\n" +
                         "\r\n" +
-                        "package com.test.matcher;\r\n" +
+                        "package org.hamgen.testdata.matcher;\r\n" +
                         "\r\n" +
                         "import java.util.ArrayList;\r\n" +
                         "import java.util.List;\r\n" +
-                        "import com.test.MatcherBuilderTestDataListSomething;\r\n" +
                         "import org.hamcrest.Description;\r\n" +
                         "import org.hamcrest.Factory;\r\n" +
                         "import org.hamcrest.Matcher;\r\n" +
                         "import org.hamcrest.Matchers;\r\n" +
                         "import org.hamgen.HamGenDiagnosingMatcher;\r\n" +
+                        "import org.hamgen.testdata.MatcherBuilderTestDataListSomething;\r\n" +
                         "import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;\r\n" +
-                        "import org.hamgen.testdata.matcher.MatcherBuilderTestDataSomethingElseMatcher;\r\n" +
                         "\r\n" +
                         "public class MatcherBuilderTestDataListSomethingMatcher\r\n" +
                         "    extends HamGenDiagnosingMatcher\r\n" +
@@ -318,7 +321,8 @@ public class MatcherBuilderTest {
         // Act
         //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
         //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
-        MatcherBuilder matcherBuilder = MatcherBuilder.matcherBuild("com.test", "MatcherBuilderTestDataListSomething")
+        MatcherBuilder matcherBuilder = new MatcherBuilder()
+                .withClass(MatcherBuilderTestDataListSomething.class)
                 .matchFields(MatcherBuilderTestDataListSomething.class.getMethods());
         JCodeModel result = matcherBuilder.build();
 

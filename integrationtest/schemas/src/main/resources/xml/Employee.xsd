@@ -12,6 +12,19 @@
                 <xs:element ref="ns1:PersonNameStruct"/>
                 <xs:element ref="ns1:Address"/>
                 <xs:element name="Email" type="ns1:EmailAddress"/>
+                <xs:element name="Foo">
+                    <xs:complexType >
+                        <xs:all>
+                            <xs:element name="Bars">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Bar" type="xs:string" maxOccurs="unbounded"/>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:all>
+                    </xs:complexType>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

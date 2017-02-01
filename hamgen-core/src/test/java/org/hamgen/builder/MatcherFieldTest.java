@@ -154,30 +154,6 @@ public class MatcherFieldTest {
 
 
     @Test
-    public void t0407_buildMatcherInitializationSimpleTypes() throws Exception {
-        //Arrange
-        JCodeModel codeModel = new JCodeModel();
-        MatcherField matcherField = new MatcherField("getSomething", "something", "Match", double.class);
-        MatcherFieldBuilder matcherFieldBuilder = MatcherField.builder(matcherField).withCodeModel(codeModel);
-
-        JBlock constructorBlock = new JBlock();
-        CodeModelTestDataBuilder testDataBuilder = new CodeModelTestDataBuilder().withCodeModel(codeModel);
-        JVar matcherJVar = testDataBuilder.buildJVar(Matcher.class, "somethingMatch");
-        JVar expectedJVar = testDataBuilder.buildJVar(double.class, PARAM_NAME_EXPECTED);
-
-        String expected =
-                "{\r\n" +
-                        "    somethingMatch = org.hamcrest.Matchers.is(expected.getSomething());\r\n" +
-                        "}";
-
-        //Act
-        JBlock result = matcherFieldBuilder.buildMatcherInitialization(constructorBlock, matcherJVar, expectedJVar, MATCHER_PRE_FIX, PACKAGE_POST_FIX);
-
-        //Assert
-        assertEquals(expected, generableToString(result));
-    }
-
-    @Test
     public void t0408_buildMatcherInitializationOtherTypes() throws Exception {
         //Arrange
         JCodeModel codeModel = new JCodeModel();
