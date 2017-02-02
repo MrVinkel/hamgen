@@ -17,6 +17,7 @@ public class NullCheckMatcherInitializationBuilder extends MatcherInitialization
         types.add(BigDecimal.class);
         types.add(BigInteger.class);
         types.add(XMLGregorianCalendar.class);
+        types.add(Object.class);
         return types;
     }
 
@@ -24,9 +25,9 @@ public class NullCheckMatcherInitializationBuilder extends MatcherInitialization
     public JBlock build() {
         JClass matchersClazz = codeModel.ref(Matchers.class);
 
-        JExpression condition = expected.eq(JExpr._null());
+        JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
         JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke("nullValue");
-        JInvocation invokeMatcherIs = matchersClazz.staticInvoke("is").arg(expected);
+        JInvocation invokeMatcherIs = matchersClazz.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
 
         JExpression assignmentExpression = JOp.cond(condition, invokeMatcherNullValue, invokeMatcherIs);
 
