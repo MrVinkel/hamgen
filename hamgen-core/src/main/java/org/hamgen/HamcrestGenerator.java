@@ -19,7 +19,7 @@ public class HamcrestGenerator {
         this.properties = properties;
     }
 
-    public void generateMatchers(Collection<Class<?>> classes) throws Exception {
+    public void generateMatchers(Collection<Class<?>> classes, List<Class<?>> excludeClasses) throws Exception {
         LOGGER.info("Generating matchers..");
         File outputDir = createOutputDir();
 
@@ -31,9 +31,10 @@ public class HamcrestGenerator {
                 continue;
             }
 
-            LOGGER.info("Building matcher for " + clazz.getName());
+            LOGGER.debug("Building matcher for " + clazz.getName());
             MatcherBuilder matcherClassBuilder = new MatcherBuilder()
                     .withClass(clazz)
+                    .withExcludeTypes(excludeClasses)
                     .withMatcherPrefix(properties.getProperty(MATCHER_PRE_FIX))
                     .withMatcherNamePostfix(properties.getProperty(MATCHER_POST_FIX))
                     .withPackagePostFix(properties.getProperty(PACKAGE_POST_FIX))
@@ -53,7 +54,7 @@ public class HamcrestGenerator {
             }
             LOGGER.warn("No classes found!");
         } else {
-            LOGGER.debug("Found " + classes.size() + " classes");
+            LOGGER.info("Found " + classes.size() + " classes");
         }
     }
 

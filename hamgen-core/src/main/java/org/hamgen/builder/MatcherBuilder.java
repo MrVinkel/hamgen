@@ -8,6 +8,7 @@ import org.hamgen.HamProperties;
 import org.hamgen.model.MatcherField;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -31,6 +32,7 @@ public class MatcherBuilder {
     private String packagePostFix = HamProperties.Key.PACKAGE_POST_FIX.getDefaultValue();
     private String matcherPreFix = HamProperties.Key.MATCHER_PRE_FIX.getDefaultValue();
     private List<MatcherField> matcherFields = new ArrayList<MatcherField>();
+    private Map<String,Class<?>> excludeTypes = new HashMap<String, Class<?>>();
     private JCodeModel codeModel;
 
     public MatcherBuilder() {
@@ -63,17 +65,37 @@ public class MatcherBuilder {
         return this;
     }
 
+    public MatcherBuilder withExcludeTypes(List<Class<?>> excludeTypes) {
+        for (Class<?> i : excludeTypes) {
+            this.excludeTypes.put(i.getName(),i);
+        }
+        return this;
+    }
+
     public MatcherBuilder matchField(Method getterMethod) {
         if (!isGetterMethod(getterMethod)) {
             LOGGER.debug("Not a getter method: " + getterMethod.getName());
             return this;
         }
-
-        Type type = getterMethod.getGenericReturnType();
         String name = getterMethod.getName();
+        Type type = getterMethod.getGenericReturnType();
+        if(isExcludedType(type)) {
+            LOGGER.debug("Ignoring getterMethod: " + getterMethod.getName());
+            return this;
+        }
+
         MatcherField matcherField = MatcherField.builder(type, name).withPostFix(matcherNamePostFix).build();
         matcherFields.add(matcherField);
         return this;
+    }
+
+    private boolean isExcludedType(Type type) {
+        if(type instanceof ParameterizedType) {
+            type = ((ParameterizedType) type).getRawType();
+        }
+        String className = ((Class<?>)type).getName();
+
+        return excludeTypes.containsKey(className);
     }
 
     public MatcherBuilder matchFields(Method... getterMethods) {

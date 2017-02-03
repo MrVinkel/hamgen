@@ -46,7 +46,13 @@ public class Generate extends AbstractMojo {
      * Names of classes to generate matchers for - don't include those found by the annotation
      */
     @Parameter
-    private List<String> classNames;
+    private List<String> classIncludes;
+
+    /**
+     * Names of classes to ignore - matcher classes wont be generated for them and if another class has it as a field it will be ignored in the match check
+     */
+    @Parameter
+    private List<String> classExcludes;
 
     /**
      * Fail if no classes are found - default is true
@@ -81,15 +87,25 @@ public class Generate extends AbstractMojo {
                 classes.addAll(classFinder.findClassesWithAnnotation(packageNames, properties.getProperty(ANNOTATION, ANNOTATION.getDefaultValue())));
             }
 
-            if(classNames != null && classNames.size() > 0) {
-                for(String name : classNames) {
+            if(classIncludes != null && classIncludes.size() > 0) {
+                for(String name : classIncludes) {
                     Class<?> clazz = Class.forName(name);
                     classes.add(clazz);
                 }
             }
 
+            List<Class<?>> excludeClasses = new ArrayList<Class<?>>();
+            if(classExcludes != null && classExcludes.size() > 0) {
+                for(String name : classExcludes) {
+                    Class<?> clazz = Class.forName(name);
+                    excludeClasses.add(clazz);
+                }
+            }
+
+            classes.removeAll(excludeClasses);
+
             HamcrestGenerator generator = new HamcrestGenerator(properties);
-            generator.generateMatchers(classes);
+            generator.generateMatchers(classes, excludeClasses);
         } catch (Exception e) {
             throw new MojoExecutionException("Buhuuu it failed :(", e);
         }

@@ -8,6 +8,9 @@ import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.junit.Test;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamgen.testtools.CodeModelUtil.codeModelToString;
 import static org.junit.Assert.assertEquals;
 
@@ -324,6 +327,89 @@ public class MatcherBuilderTest {
         MatcherBuilder matcherBuilder = new MatcherBuilder()
                 .withClass(MatcherBuilderTestDataListSomething.class)
                 .matchFields(MatcherBuilderTestDataListSomething.class.getMethods());
+        JCodeModel result = matcherBuilder.build();
+
+        // Assert
+        assertEquals(expected, codeModelToString(result));
+    }
+
+
+    @Test
+    public void t0205_ExcludedFields() throws Exception {
+        // Arrange
+        String expected =
+                "-----------------------------------org.hamgen.testdata.matcher.MatcherBuilderTestDataSomethingElseMatcher.java-----------------------------------\r\n" +
+                        "\r\n" +
+                        "package org.hamgen.testdata.matcher;\r\n" +
+                        "\r\n" +
+                        "import org.hamcrest.Description;\r\n" +
+                        "import org.hamcrest.Factory;\r\n" +
+                        "import org.hamcrest.Matcher;\r\n" +
+                        "import org.hamcrest.Matchers;\r\n" +
+                        "import org.hamgen.HamGenDiagnosingMatcher;\r\n" +
+                        "import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;\r\n" +
+                        "\r\n" +
+                        "public class MatcherBuilderTestDataSomethingElseMatcher\r\n" +
+                        "    extends HamGenDiagnosingMatcher\r\n" +
+                        "{\r\n" +
+                        "\r\n" +
+                        "    private Matcher myEnumMatcher;\r\n" +
+                        "    private Matcher mySecondFieldMatcher;\r\n" +
+                        "\r\n" +
+                        "    public MatcherBuilderTestDataSomethingElseMatcher(MatcherBuilderTestDataSomethingElse expected) {\r\n" +
+                        "        myEnumMatcher = Matchers.is(expected.getMyEnum());\r\n" +
+                        "        mySecondFieldMatcher = Matchers.is(expected.getMySecondField());\r\n" +
+                        "    }\r\n" +
+                        "\r\n" +
+                        "    public void describeTo(Description desc) {\r\n" +
+                        "        desc.appendText(\"{\");\r\n" +
+                        "        desc.appendText(\"myEnum \");\r\n" +
+                        "        desc.appendDescriptionOf(myEnumMatcher);\r\n" +
+                        "        desc.appendText(\", \");\r\n" +
+                        "        desc.appendText(\"mySecondField \");\r\n" +
+                        "        desc.appendDescriptionOf(mySecondFieldMatcher);\r\n" +
+                        "        desc.appendText(\"}\");\r\n" +
+                        "    }\r\n" +
+                        "\r\n" +
+                        "    public boolean matchesSafely(Object item, Description mismatchDesc) {\r\n" +
+                        "        MatcherBuilderTestDataSomethingElse actual = ((MatcherBuilderTestDataSomethingElse) item);\r\n" +
+                        "        boolean matches = true;\r\n" +
+                        "        mismatchDesc.appendText(\"{\");\r\n" +
+                        "        if (!myEnumMatcher.matches(actual.getMyEnum())) {\r\n" +
+                        "            HamGenDiagnosingMatcher.reportMismatch(\"myEnum\", myEnumMatcher, actual.getMyEnum(), mismatchDesc, matches);\r\n" +
+                        "            matches = false;\r\n" +
+                        "        }\r\n" +
+                        "        if (!mySecondFieldMatcher.matches(actual.getMySecondField())) {\r\n" +
+                        "            HamGenDiagnosingMatcher.reportMismatch(\"mySecondField\", mySecondFieldMatcher, actual.getMySecondField(), mismatchDesc, matches);\r\n" +
+                        "            matches = false;\r\n" +
+                        "        }\r\n" +
+                        "        mismatchDesc.appendText(\"}\");\r\n" +
+                        "        return matches;\r\n" +
+                        "    }\r\n" +
+                        "\r\n" +
+                        "    @Factory\r\n" +
+                        "    public static MatcherBuilderTestDataSomethingElseMatcher isMatcherBuilderTestDataSomethingElse(MatcherBuilderTestDataSomethingElse expected) {\r\n" +
+                        "        return new MatcherBuilderTestDataSomethingElseMatcher(expected);\r\n" +
+                        "    }\r\n" +
+                        "\r\n" +
+                        "}\r\n";
+
+        List<Class<?>> excludedTypes = new ArrayList<Class<?>>();
+        excludedTypes.add(String.class);
+
+
+        // Act
+        //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
+        //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
+        MatcherBuilder matcherBuilder = new MatcherBuilder()
+                .withClass(MatcherBuilderTestDataSomethingElse.class)
+                .withExcludeTypes(excludedTypes)
+                .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethod("myRandomFunction"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getMyEnum"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getMySecondField"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getMyField"),
+                        MatcherBuilderTestDataSomethingElse.class.getMethod("getClass"));
+
         JCodeModel result = matcherBuilder.build();
 
         // Assert

@@ -161,13 +161,13 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 
 * Support for matching collection lax
 * Verification of all nested matchers are generated
-* List of classes to exclude (and rename classNames to includeClasses/excludeClasses)
+* List of classes to exclude (and rename classNames to includeClasses/excludeClasses) - Added in v1.3
 * Split up unit test and parametize some of them
 
 ### Bugs:
 
-* Missing support for BigDecimal - Fixed in v1.3 needs unit testing
-* Missing support for BigInteger - Fixed in v1.3 needs unit testing
+* Missing support for BigDecimal - Fixed in v1.3
+* Missing support for BigInteger - Fixed in v1.3
 * Missing support for XMLGregorianCalendar - Fixed in v1.3 needs unit testing
 * Missing support for byte arrays byte[] - Hacked, needs proper fix and testing
 * Wrong generation for inner classes - Done

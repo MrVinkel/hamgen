@@ -47,7 +47,7 @@
                             <packageNames>
                                 <packageName>org.hamgen.integrationtest.schemapackage</packageName>
                             </packageNames>
-                            <outputDir>${project.build.directory}/generated-test-sources/hamgen</outputDir>
+                            <outputDirectory>${project.build.directory}/generated-test-sources/hamgen</outputDirectory>
                             <annotation>javax.xml.bind.annotation.XmlType</annotation>
                         </configuration>
                     </execution>

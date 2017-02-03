@@ -35,7 +35,7 @@ public class HamcrestGeneratorTest {
 
         //Act
         try {
-            hamcrestGenerator.generateMatchers(Collections.<Class<?>>emptyList());
+            hamcrestGenerator.generateMatchers(Collections.<Class<?>>emptyList(), Collections.<Class<?>>emptyList());
             fail();
         } catch (Exception e) {
             //Assert
@@ -56,7 +56,7 @@ public class HamcrestGeneratorTest {
         SimpleEntry<LogLevel, String> expected = new SimpleEntry<LogLevel, String>(WARN, "No classes found!");
 
         //Act
-        hamcrestGenerator.generateMatchers(Collections.<Class<?>>emptyList());
+        hamcrestGenerator.generateMatchers(Collections.<Class<?>>emptyList(), Collections.<Class<?>>emptyList());
 
         //Assert
         assertThat(BufferLogger.getLog(), (Matcher) hasItem(is(expected)));
