@@ -41,15 +41,27 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
                 <goal>generate</goal>
             </goals>
             <configuration>
+                <!-- Output directory of generated matchers -->
                 <outputDirectory>${project.build.directory}/generated-test-sources/hamgen</outputDirectory>
+
+                <!-- package names to scan for classes -->
                 <packageNames>
                     <packageName>org.hamgen.integrationtest.schemapackage</packageName>
                     <packageName>org.hamgen.other.package</packageName>
                 </packageNames>
+
+                <!-- Annotation scanned classes must have -->
                 <annotation>javax.xml.bind.annotation.XmlType</annotation>
-                <classNames>
-                    <className>my.custom.class.without.annotation</className>
-                </classNames>
+
+                <!-- Classes to include that don't have the annotation -->
+                <classIncludes>
+                    <classInclude>my.custom.class.without.annotation</classInclude>
+                </classIncludes>
+
+                <!-- Classes to exclude/ignore when generated matchers -->
+                <classExcludes>
+                    <classExclude>a.class.i.do.not.want.to.match</classExclude>
+                </classExcludes>
             </configuration>
         </execution>
     </executions>
@@ -170,7 +182,7 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 * Missing support for BigInteger - Fixed in v1.3
 * Missing support for XMLGregorianCalendar - Fixed in v1.3 needs unit testing
 * Missing support for byte arrays byte[] - Hacked, needs proper fix and testing
-* Wrong generation for inner classes - Done
+* Wrong generation for inner classes - Fixed in v1.3
 
 ## License
 -----------
