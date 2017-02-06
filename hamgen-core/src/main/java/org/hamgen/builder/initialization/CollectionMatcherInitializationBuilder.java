@@ -37,7 +37,7 @@ public class CollectionMatcherInitializationBuilder extends MatcherInitializatio
         JClass rawListClazz = codeModel.ref(List.class);
         JClass genericClazz = codeModel.ref(collectionClass);
         JClass itemsListClazz = rawListClazz.narrow(genericClazz);
-        JVar itemsList = constructorBody.decl(itemsListClazz, "items", expected.invoke(matcherField.getGetterName()));
+        JVar itemsList = constructorBody.decl(itemsListClazz, matcherField.getName() + "Items", expected.invoke(matcherField.getGetterName()));
 
         JConditional isListNull = constructorBody._if(itemsList.eq(JExpr._null()));
         isListNull._then().assign(matcher, matchersClazz.staticInvoke("nullValue"));
