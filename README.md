@@ -183,6 +183,8 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 * Missing support for XMLGregorianCalendar - Fixed in v1.3 needs unit testing
 * Missing support for byte arrays byte[] - Hacked, needs proper fix and testing
 * Wrong generation for inner classes - Fixed in v1.3
+* Multiple collections initialization gives compile error
+* Collections initialization don't look at excluded classes (Might be RarameterType)
 
 ## License
 -----------
