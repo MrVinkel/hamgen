@@ -282,12 +282,12 @@ public class MatcherBuilderTest {
                         "    private Matcher someListMatcher;\r\n" +
                         "\r\n" +
                         "    public MatcherBuilderTestDataListSomethingMatcher(MatcherBuilderTestDataListSomething expected) {\r\n" +
-                        "        List<MatcherBuilderTestDataSomethingElse> items = expected.getSomeList();\r\n" +
-                        "        if (items == null) {\r\n" +
+                        "        List<MatcherBuilderTestDataSomethingElse> someListMatcherItems = expected.getSomeList();\r\n" +
+                        "        if (someListMatcherItems == null) {\r\n" +
                         "            someListMatcher = Matchers.nullValue();\r\n" +
                         "        } else {\r\n" +
                         "            List<Matcher> matchers = new ArrayList<Matcher>();\r\n" +
-                        "            for (MatcherBuilderTestDataSomethingElse item: items) {\r\n" +
+                        "            for (MatcherBuilderTestDataSomethingElse item: someListMatcherItems) {\r\n" +
                         "                Matcher itemMatcher = ((item == null)?Matchers.nullValue():MatcherBuilderTestDataSomethingElseMatcher.isMatcherBuilderTestDataSomethingElse(item));\r\n" +
                         "                matchers.add(itemMatcher);\r\n" +
                         "            }\r\n" +

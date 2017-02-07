@@ -216,12 +216,12 @@ public class MatcherFieldTest {
 
         String expected =
                 "{\r\n" +
-                        "    java.util.List<java.lang.String> items = expected.getMyList();\r\n" +
-                        "    if (items == null) {\r\n" +
+                        "    java.util.List<java.lang.String> myListMatchItems = expected.getMyList();\r\n" +
+                        "    if (myListMatchItems == null) {\r\n" +
                         "        myListMatcher = org.hamcrest.Matchers.nullValue();\r\n" +
                         "    } else {\r\n" +
                         "        java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<org.hamcrest.Matcher>();\r\n" +
-                        "        for (java.lang.String item: items) {\r\n" +
+                        "        for (java.lang.String item: myListMatchItems) {\r\n" +
                         "            org.hamcrest.Matcher itemMatcher = (((item == null)||item.isEmpty())?org.hamcrest.Matchers.isEmptyOrNullString():org.hamcrest.Matchers.is(item));\r\n" +
                         "            matchers.add(itemMatcher);\r\n" +
                         "        }\r\n" +
@@ -250,12 +250,12 @@ public class MatcherFieldTest {
         JVar expectedJVar = testDataBuilder.buildJVar(ArrayList.class, PARAM_NAME_EXPECTED);
 
         String expected = "{\r\n" +
-                "    java.util.List<org.hamgen.testdata.MatcherBuilderTestDataSomething> items = expected.getMyList();\r\n" +
-                "    if (items == null) {\r\n" +
+                "    java.util.List<org.hamgen.testdata.MatcherBuilderTestDataSomething> myListMatcherItems = expected.getMyList();\r\n" +
+                "    if (myListMatcherItems == null) {\r\n" +
                 "        myListMatcher = org.hamcrest.Matchers.nullValue();\r\n" +
                 "    } else {\r\n" +
                 "        java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<org.hamcrest.Matcher>();\r\n" +
-                "        for (org.hamgen.testdata.MatcherBuilderTestDataSomething item: items) {\r\n" +
+                "        for (org.hamgen.testdata.MatcherBuilderTestDataSomething item: myListMatcherItems) {\r\n" +
                 "            org.hamcrest.Matcher itemMatcher = ((item == null)?org.hamcrest.Matchers.nullValue():org.hamgen.testdata.matcher.MatcherBuilderTestDataSomethingMatcher.isMatcherBuilderTestDataSomething(item));\r\n" +
                 "            matchers.add(itemMatcher);\r\n" +
                 "        }\r\n" +
@@ -284,12 +284,12 @@ public class MatcherFieldTest {
         JVar expectedJVar = testDataBuilder.buildJVar(ArrayList.class, PARAM_NAME_EXPECTED);
 
         String expected = "{\r\n" +
-                "    java.util.List<java.lang.Double> items = expected.getMyList();\r\n" +
-                "    if (items == null) {\r\n" +
+                "    java.util.List<java.lang.Double> myListMatchItems = expected.getMyList();\r\n" +
+                "    if (myListMatchItems == null) {\r\n" +
                 "        myListMatcher = org.hamcrest.Matchers.nullValue();\r\n" +
                 "    } else {\r\n" +
                 "        java.util.List<org.hamcrest.Matcher> matchers = new java.util.ArrayList<org.hamcrest.Matcher>();\r\n" +
-                "        for (java.lang.Double item: items) {\r\n" +
+                "        for (java.lang.Double item: myListMatchItems) {\r\n" +
                 "            org.hamcrest.Matcher itemMatcher = org.hamcrest.Matchers.is(item);\r\n" +
                 "            matchers.add(itemMatcher);\r\n" +
                 "        }\r\n" +
