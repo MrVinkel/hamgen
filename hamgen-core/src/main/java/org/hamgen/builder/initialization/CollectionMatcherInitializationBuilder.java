@@ -15,6 +15,20 @@ import java.util.Set;
 
 public class CollectionMatcherInitializationBuilder extends MatcherInitializationBuilder {
 
+    private static final String PARAM_NAME_ITEMS = "Items";
+    private static final String PARAM_NAME_ITEM = "item";
+    private static final String PARAM_NAME_MATCHERS = "matchers";
+    private static final String PARAM_NAME_ITEM_MATCHER = "itemMatcher";
+
+    private static final String METHOD_NAME_NULL_VALUE = "nullValue";
+    private static final String METHOD_NAME_IS = "is";
+    private static final String METHOD_NAME_IS_EMPTY = "isEmpty";
+    private static final String METHOD_NAME_IS_EMPTY_OR_NULL_STRING = "isEmptyOrNullString";
+    private static final String METHOD_NAME_ADD = "add";
+    private static final String METHOD_NAME_CONTAINS = "contains";
+    private static final String METHOD_NAME_TO_ARRAY = "toArray";
+    private static final String METHOD_NAME_SIZE = "size";
+
     @Override
     public List<Class<?>> getTypes() {
         List<Class<?>> types = new ArrayList<Class<?>>();
@@ -37,31 +51,31 @@ public class CollectionMatcherInitializationBuilder extends MatcherInitializatio
         JClass rawListClazz = codeModel.ref(List.class);
         JClass genericClazz = codeModel.ref(collectionClass);
         JClass itemsListClazz = rawListClazz.narrow(genericClazz);
-        JVar itemsList = constructorBody.decl(itemsListClazz, matcherField.getName() + "Items", expected.invoke(matcherField.getGetterName()));
+        JVar itemsList = constructorBody.decl(itemsListClazz, matcherField.getName() + PARAM_NAME_ITEMS, expected.invoke(matcherField.getGetterName()));
 
         JConditional isListNull = constructorBody._if(itemsList.eq(JExpr._null()));
-        isListNull._then().assign(matcher, matchersClazz.staticInvoke("nullValue"));
+        isListNull._then().assign(matcher, matchersClazz.staticInvoke(METHOD_NAME_NULL_VALUE));
         JBlock listNotEmptyBlock = isListNull._else();
 
         JClass matcherListClazz = rawListClazz.narrow(matcherClazz);
         JClass arrayListClass = codeModel.ref(ArrayList.class).narrow(matcherClazz);
-        JVar matchersList = listNotEmptyBlock.decl(matcherListClazz, "matchers", JExpr._new(arrayListClass));
+        JVar matchersList = listNotEmptyBlock.decl(matcherListClazz, PARAM_NAME_MATCHERS, JExpr._new(arrayListClass));
 
-        JForEach itemLoop = listNotEmptyBlock.forEach(genericClazz, "item", itemsList);
+        JForEach itemLoop = listNotEmptyBlock.forEach(genericClazz, PARAM_NAME_ITEM, itemsList);
         JVar item = itemLoop.var();
         JBlock itemLoopBlock = itemLoop.body();
-        JInvocation invokeMatcherIs = matchersClazz.staticInvoke("is").arg(item);
+        JInvocation invokeMatcherIs = matchersClazz.staticInvoke(METHOD_NAME_IS).arg(item);
 
         JExpression matcherInitialization;
         if (collectionType == String.class) {
-            JExpression condition = item.eq(JExpr._null()).cor(item.invoke("isEmpty"));
-            JInvocation invokeMatcherIsEmptyOrNullString = matchersClazz.staticInvoke("isEmptyOrNullString");
+            JExpression condition = item.eq(JExpr._null()).cor(item.invoke(METHOD_NAME_IS_EMPTY));
+            JInvocation invokeMatcherIsEmptyOrNullString = matchersClazz.staticInvoke(METHOD_NAME_IS_EMPTY_OR_NULL_STRING);
             matcherInitialization = JOp.cond(condition, invokeMatcherIsEmptyOrNullString, invokeMatcherIs);
         } else if (collectionClass.isPrimitive() || ClassUtil.isPrimitiveWrapper(collectionClass) || collectionClass.isEnum()) {
             matcherInitialization = invokeMatcherIs;
         } else {
             JExpression condition = item.eq(JExpr._null());
-            JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke("nullValue");
+            JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke(METHOD_NAME_NULL_VALUE);
 
             String generatedMatcherName = collectionClass.getPackage().getName() + packagePostFix + "." + collectionClass.getSimpleName() + matcherField.getFieldPostFix();
             String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(collectionClass.getSimpleName());
@@ -70,10 +84,10 @@ public class CollectionMatcherInitializationBuilder extends MatcherInitializatio
 
             matcherInitialization = JOp.cond(condition, invokeMatcherNullValue, invokeGeneratedMatcher);
         }
-        JVar itemMatcher = itemLoopBlock.decl(matcherClazz, "itemMatcher", matcherInitialization);
-        itemLoopBlock.add(matchersList.invoke("add").arg(itemMatcher));
+        JVar itemMatcher = itemLoopBlock.decl(matcherClazz, PARAM_NAME_ITEM_MATCHER, matcherInitialization);
+        itemLoopBlock.add(matchersList.invoke(METHOD_NAME_ADD).arg(itemMatcher));
 
-        listNotEmptyBlock.assign(matcher, matchersClazz.staticInvoke("contains").arg(matchersList.invoke("toArray").arg(JExpr.newArray(matcherClazz, matchersList.invoke("size")))));
+        listNotEmptyBlock.assign(matcher, matchersClazz.staticInvoke(METHOD_NAME_CONTAINS).arg(matchersList.invoke(METHOD_NAME_TO_ARRAY).arg(JExpr.newArray(matcherClazz, matchersList.invoke(METHOD_NAME_SIZE)))));
 
         return constructorBody;
     }

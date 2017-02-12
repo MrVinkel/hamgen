@@ -5,7 +5,7 @@ import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * DO NOT CHANGE THIS CLASS! it will brake ReflectiveClassFinderTest
+ * DO NOT CHANGE THIS CLASS! it will brake tests
  */
 @XmlType
 public final class MatcherBuilderTestDataSomething {

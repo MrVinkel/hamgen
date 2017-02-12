@@ -1,6 +1,8 @@
 package org.hamgen;
 
 import org.hamcrest.Matcher;
+import org.hamgen.test.data.ClassWithInnerClass;
+import org.hamgen.test.data.test.TestClass;
 import org.hamgen.testdata.MatcherBuilderTestDataListSomething;
 import org.hamgen.testdata.MatcherBuilderTestDataSomething;
 import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
@@ -94,12 +96,15 @@ public class ReflectiveClassFinderTest {
         Collection<Class<?>> result = classFinder.findClassesWithAnnotation(packages, null);
 
         //Assert
-        Assert.assertEquals(7, result.size());
-        // todo add the missing 3..
+        Assert.assertEquals(8, result.size());
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(MatcherBuilderTestDataListSomething.class.getName()))));
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(MatcherBuilderTestDataSomething.class.getName()))));
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(MatcherBuilderTestDataSomethingElse.class.getName()))));
         assertThat(result, (Matcher)hasItem(hasProperty("name", is(org.hamgen.test.data.MatcherBuilderTestDataSomething.class.getName()))));
+        assertThat(result, (Matcher)hasItem(hasProperty("name", is(TestClass.class.getName()))));
+        assertThat(result, (Matcher)hasItem(hasProperty("name", is(ClassWithInnerClass.class.getName()))));
+        assertThat(result, (Matcher)hasItem(hasProperty("name", is(ClassWithInnerClass.MyInnerClass.class.getName()))));
+        assertThat(result, (Matcher)hasItem(hasProperty("name", is(ClassWithInnerClass.MyInnerClass.MyInnerInnerClass.class.getName()))));
     }
 
     @Test

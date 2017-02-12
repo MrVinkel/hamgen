@@ -1,5 +1,8 @@
 package org.hamgen.test.data;
 
+/**
+ * DO NOT CHANGE THIS CLASS! it will brake tests
+ */
 public class ClassWithInnerClass {
 
     public MyInnerClass getInnerClass() {

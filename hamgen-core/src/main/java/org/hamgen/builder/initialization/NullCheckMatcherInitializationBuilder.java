@@ -11,6 +11,9 @@ import java.util.List;
 
 public class NullCheckMatcherInitializationBuilder extends MatcherInitializationBuilder {
 
+    private static final String METHOD_NAME_NULL_VALUE = "nullValue";
+    private static final String METHOD_NAME_IS = "is";
+
     @Override
     public List<Class<?>> getTypes() {
         List<Class<?>> types = new ArrayList<Class<?>>();
@@ -26,8 +29,8 @@ public class NullCheckMatcherInitializationBuilder extends MatcherInitialization
         JClass matchersClazz = codeModel.ref(Matchers.class);
 
         JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
-        JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke("nullValue");
-        JInvocation invokeMatcherIs = matchersClazz.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
+        JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke(METHOD_NAME_NULL_VALUE);
+        JInvocation invokeMatcherIs = matchersClazz.staticInvoke(METHOD_NAME_IS).arg(expected.invoke(matcherField.getGetterName()));
 
         JExpression assignmentExpression = JOp.cond(condition, invokeMatcherNullValue, invokeMatcherIs);
 

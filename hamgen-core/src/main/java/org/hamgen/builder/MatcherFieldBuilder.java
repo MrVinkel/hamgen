@@ -15,6 +15,12 @@ import static com.sun.codemodel.JExpr.FALSE;
 
 public class MatcherFieldBuilder {
     private static final Logger LOGGER = Logger.getLogger();
+
+    private static final String METHOD_NAME_APPEND_TEXT = "appendText";
+    private static final String METHOD_NAME_APPEND_DESCRIPTION_OF = "appendDescriptionOf";
+    private static final String METHOD_NAME_MATCHES = "matches";
+    private static final String METHOD_NAME_REPORT_MISMATCH = "reportMismatch";
+
     private MatcherField matcherField = new MatcherField(null, null, null, null);
     private JCodeModel codeModel;
 
@@ -73,16 +79,16 @@ public class MatcherFieldBuilder {
 
     public JBlock buildDescribeTo(JBlock describeToBody, JVar descriptionParam, JVar matcher, boolean first) {
         if (!first) {
-            describeToBody.invoke(descriptionParam, "appendText").arg(", ");
+            describeToBody.invoke(descriptionParam, METHOD_NAME_APPEND_TEXT).arg(", ");
         }
-        describeToBody.invoke(descriptionParam, "appendText").arg(matcherField.getOrigName() + " ");
-        describeToBody.invoke(descriptionParam, "appendDescriptionOf").arg(matcher);
+        describeToBody.invoke(descriptionParam, METHOD_NAME_APPEND_TEXT).arg(matcherField.getOrigName() + " ");
+        describeToBody.invoke(descriptionParam, METHOD_NAME_APPEND_DESCRIPTION_OF).arg(matcher);
         return describeToBody;
     }
 
     public JBlock buildMatchesSafely(JBlock matcherSafelyBody, JVar matcher, JVar actual, JVar matches, JVar mismatchDescription, JClass hamcrestMatcherClass) {
-        JBlock matchFailedBlock = matcherSafelyBody._if(matcher.invoke("matches").arg(actual.invoke(matcherField.getGetterName())).not())._then();
-        matchFailedBlock.staticInvoke(hamcrestMatcherClass, "reportMismatch").arg(matcherField.getOrigName()).arg(matcher).arg(actual.invoke(matcherField.getGetterName())).arg(mismatchDescription).arg(matches);
+        JBlock matchFailedBlock = matcherSafelyBody._if(matcher.invoke(METHOD_NAME_MATCHES).arg(actual.invoke(matcherField.getGetterName())).not())._then();
+        matchFailedBlock.staticInvoke(hamcrestMatcherClass, METHOD_NAME_REPORT_MISMATCH).arg(matcherField.getOrigName()).arg(matcher).arg(actual.invoke(matcherField.getGetterName())).arg(mismatchDescription).arg(matches);
         matchFailedBlock.assign(matches, FALSE);
         return matcherSafelyBody;
     }

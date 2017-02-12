@@ -4,10 +4,8 @@ import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JGenerable;
-import com.sun.codemodel.writer.FilterCodeWriter;
 import com.sun.codemodel.writer.SingleStreamCodeWriter;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;

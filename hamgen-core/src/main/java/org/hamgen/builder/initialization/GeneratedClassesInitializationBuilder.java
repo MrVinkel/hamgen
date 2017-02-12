@@ -10,6 +10,8 @@ import java.util.List;
 
 public class GeneratedClassesInitializationBuilder extends MatcherInitializationBuilder {
 
+    private static final String METHOD_NAME_NULL_VALUE = "nullValue";
+
     @Override
     public List<Class<?>> getTypes() {
         return Collections.emptyList();
@@ -20,7 +22,7 @@ public class GeneratedClassesInitializationBuilder extends MatcherInitialization
         JClass matchersClazz = codeModel.ref(Matchers.class);
 
         JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
-        JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke("nullValue");
+        JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke(METHOD_NAME_NULL_VALUE);
 
         String generatedMatcherName = matcherField.getTypeClass().getPackage().getName() + packagePostFix + "." + matcherField.getTypeClass().getSimpleName() + matcherField.getFieldPostFix();
         String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());

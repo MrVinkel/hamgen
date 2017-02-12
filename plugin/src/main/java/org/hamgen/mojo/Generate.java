@@ -25,7 +25,7 @@ import static org.hamgen.log.Logger.getLogger;
 public class Generate extends AbstractMojo {
 
     /**
-     * Package name to scan through
+     * Package names to scan through
      */
     @Parameter(required = true)
     private List<String> packageNames;
@@ -49,7 +49,7 @@ public class Generate extends AbstractMojo {
     private List<String> classIncludes;
 
     /**
-     * Names of classes to ignore - matcher classes wont be generated for them and if another class has it as a field it will be ignored in the match check
+     * Names of classes to ignore - matcher classes won't be generated for them and if another class has it as a field it will be ignored in the match check
      */
     @Parameter
     private List<String> classExcludes;
@@ -107,6 +107,7 @@ public class Generate extends AbstractMojo {
             HamcrestGenerator generator = new HamcrestGenerator(properties);
             generator.generateMatchers(classes, excludeClasses);
         } catch (Exception e) {
+            // todo make this fantastic error handling a bit nicer
             throw new MojoExecutionException("Buhuuu it failed :(", e);
         }
     }

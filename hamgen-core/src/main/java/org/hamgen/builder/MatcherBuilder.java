@@ -18,12 +18,17 @@ import static java.lang.reflect.Modifier.PUBLIC;
 public class MatcherBuilder {
     private static final Logger LOGGER = Logger.getLogger();
 
-    private static final String PARAM_NAME_EXPECTED = "expected";
     private static final String PARAM_NAME_DESCRIPTION = "desc";
-    private static final String PARAM_NAME_ACTUAL_ITEM = "item";
     private static final String PARAM_NAME_MISMATCH_DESCRIPTION = "mismatchDesc";
+    private static final String PARAM_NAME_EXPECTED = "expected";
+    private static final String PARAM_NAME_ACTUAL_ITEM = "item";
+    private static final String PARAM_NAME_ACTUAL = "actual";
+    private static final String PARAM_NAME_MATCHES = "matches";
+
     private static final String METHOD_NAME_DESCRIPTION_TO = "describeTo";
     private static final String METHOD_NAME_MATCHES_SAFELY = "matchesSafely";
+    private static final String METHOD_NAME_APPEND_TEXT = "appendText";
+
 
     private Class<?> originalClazz;
     private String originalClassName;
@@ -61,12 +66,14 @@ public class MatcherBuilder {
         if (!packagePostFix.substring(0, 1).equals(".")) {
             packagePostFix = "." + packagePostFix;
         }
+        LOGGER.debug("Package postfix: " + packagePostFix);
         this.packagePostFix = packagePostFix;
         return this;
     }
 
     public MatcherBuilder withExcludeTypes(List<Class<?>> excludeTypes) {
         for (Class<?> i : excludeTypes) {
+            LOGGER.debug("Adding excluded type: " + i.getName());
             this.excludeTypes.put(i.getName(),i);
         }
         return this;
@@ -94,7 +101,7 @@ public class MatcherBuilder {
             type = ((ParameterizedType) type).getRawType();
         }
         String className = ((Class<?>)type).getName();
-
+        LOGGER.debug("isExcludedType: " + className);
         return excludeTypes.containsKey(className);
     }
 
@@ -125,16 +132,16 @@ public class MatcherBuilder {
         JMethod describeTo = matcherClass.method(PUBLIC, void.class, METHOD_NAME_DESCRIPTION_TO);
         JVar descriptionParam = describeTo.param(Description.class, PARAM_NAME_DESCRIPTION);
         JBlock describeToBody = describeTo.body();
-        describeToBody.invoke(descriptionParam, "appendText").arg("{");
+        describeToBody.invoke(descriptionParam, METHOD_NAME_APPEND_TEXT).arg("{");
 
         // create match method
         JMethod matchesSafely = matcherClass.method(PUBLIC, boolean.class, METHOD_NAME_MATCHES_SAFELY);
         JBlock matchtSafelyBody = matchesSafely.body();
         JVar itemParam = matchesSafely.param(Object.class, PARAM_NAME_ACTUAL_ITEM);
         JVar mismatchDescriptionParam = matchesSafely.param(Description.class, PARAM_NAME_MISMATCH_DESCRIPTION);
-        JVar actual = matchtSafelyBody.decl(originalClass, "actual", JExpr.cast(originalClass, itemParam));
-        JVar matches = matchtSafelyBody.decl(codeModel.BOOLEAN, "matches", TRUE);
-        matchtSafelyBody.invoke(mismatchDescriptionParam, "appendText").arg("{");
+        JVar actual = matchtSafelyBody.decl(originalClass, PARAM_NAME_ACTUAL, JExpr.cast(originalClass, itemParam));
+        JVar matches = matchtSafelyBody.decl(codeModel.BOOLEAN, PARAM_NAME_MATCHES, TRUE);
+        matchtSafelyBody.invoke(mismatchDescriptionParam, METHOD_NAME_APPEND_TEXT).arg("{");
 
         // create factory method
         JMethod jmFactory = matcherClass.method(PUBLIC | JMod.STATIC, matcherClass, matcherPreFix + originalClassName);
@@ -156,10 +163,10 @@ public class MatcherBuilder {
         }
 
         // finalize description
-        describeToBody.invoke(descriptionParam, "appendText").arg("}");
+        describeToBody.invoke(descriptionParam, METHOD_NAME_APPEND_TEXT).arg("}");
 
         // finalize match method
-        matchtSafelyBody.invoke(mismatchDescriptionParam, "appendText").arg("}");
+        matchtSafelyBody.invoke(mismatchDescriptionParam, METHOD_NAME_APPEND_TEXT).arg("}");
         matchtSafelyBody._return(matches);
 
         return codeModel;

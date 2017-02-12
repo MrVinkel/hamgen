@@ -2,7 +2,7 @@
 package org.hamgen.builder;
 
 import com.sun.codemodel.JCodeModel;
-import com.test.TestClass;
+import org.hamgen.test.data.test.TestClass;
 import org.hamgen.testdata.MatcherBuilderTestDataListSomething;
 import org.hamgen.testdata.MatcherBuilderTestDataSomethingElse;
 import org.junit.Test;
@@ -20,14 +20,14 @@ public class MatcherBuilderTest {
     public void t0201_MatcherBuilder() throws Exception {
         // Arrange
         String expected =
-                "-----------------------------------com.test.matcher.TestClassMatcher.java-----------------------------------\r\n" +
+                "-----------------------------------org.hamgen.test.data.test.matcher.TestClassMatcher.java-----------------------------------\r\n" +
                         "\r\n" +
-                        "package com.test.matcher;\r\n" +
+                        "package org.hamgen.test.data.test.matcher;\r\n" +
                         "\r\n" +
-                        "import com.test.TestClass;\r\n" +
                         "import org.hamcrest.Description;\r\n" +
                         "import org.hamcrest.Factory;\r\n" +
                         "import org.hamgen.HamGenDiagnosingMatcher;\r\n" +
+                        "import org.hamgen.test.data.test.TestClass;\r\n" +
                         "\r\n" +
                         "public class TestClassMatcher\r\n" +
                         "    extends HamGenDiagnosingMatcher\r\n" +
@@ -67,14 +67,14 @@ public class MatcherBuilderTest {
     public void t0202_MatcherBuilderCustomPrePostFixes() throws Exception {
         // Arrange
         String expected =
-                "-----------------------------------com.test.My.Package.TestClassMyPost.java-----------------------------------\r\n" +
+                "-----------------------------------org.hamgen.test.data.test.My.Package.TestClassMyPost.java-----------------------------------\r\n" +
                         "\r\n" +
-                        "package com.test.My.Package;\r\n" +
+                        "package org.hamgen.test.data.test.My.Package;\r\n" +
                         "\r\n" +
-                        "import com.test.TestClass;\r\n" +
                         "import org.hamcrest.Description;\r\n" +
                         "import org.hamcrest.Factory;\r\n" +
                         "import org.hamgen.HamGenDiagnosingMatcher;\r\n" +
+                        "import org.hamgen.test.data.test.TestClass;\r\n" +
                         "\r\n" +
                         "public class TestClassMyPost\r\n" +
                         "    extends HamGenDiagnosingMatcher\r\n" +
@@ -121,14 +121,14 @@ public class MatcherBuilderTest {
     public void t0202_MatcherBuilderCustomPrePostFixesPackageWithDots() throws Exception {
         // Arrange
         String expected =
-                "-----------------------------------com.test.My.Package.TestClassMyPost.java-----------------------------------\r\n" +
+                "-----------------------------------org.hamgen.test.data.test.My.Package.TestClassMyPost.java-----------------------------------\r\n" +
                         "\r\n" +
-                        "package com.test.My.Package;\r\n" +
+                        "package org.hamgen.test.data.test.My.Package;\r\n" +
                         "\r\n" +
-                        "import com.test.TestClass;\r\n" +
                         "import org.hamcrest.Description;\r\n" +
                         "import org.hamcrest.Factory;\r\n" +
                         "import org.hamgen.HamGenDiagnosingMatcher;\r\n" +
+                        "import org.hamgen.test.data.test.TestClass;\r\n" +
                         "\r\n" +
                         "public class TestClassMyPost\r\n" +
                         "    extends HamGenDiagnosingMatcher\r\n" +

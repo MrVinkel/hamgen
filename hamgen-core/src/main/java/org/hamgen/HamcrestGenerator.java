@@ -61,7 +61,8 @@ public class HamcrestGenerator {
     private File createOutputDir() {
         File outputDir = new File(properties.getProperty(OUTPUT_DIR));
         LOGGER.debug("Creating output dir: " + outputDir.getAbsolutePath());
-        outputDir.mkdirs();
+        boolean mkdirs = outputDir.mkdirs();
+        LOGGER.debug("Mkdirs: " + mkdirs);
         return outputDir;
     }
 

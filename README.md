@@ -74,6 +74,28 @@ Inspired by [How Hamcrest can save your soul](http://blogs.atlassian.com/2009/06
     </dependencies>
 </plugin>
 ...
+<!-- Add generated sources to jar -->
+<plugin>
+    <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin -->
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <version>1.12</version>
+    <executions>
+        <execution>
+            <id>add-test-sources</id>
+            <phase>process-test-resources</phase>
+            <goals>
+                <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+                <sources>
+                    <source>${project.build.directory}/generated-test-sources/hamgen</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+...
 ```
 
 ## Examples
@@ -174,14 +196,13 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 * Support for matching collection lax
 * Verification of all nested matchers are generated
 * List of classes to exclude (and rename classNames to includeClasses/excludeClasses) - Added in v1.3
-* Split up unit test and parametize some of them
 
 ### Bugs:
 
 * Missing support for BigDecimal - Fixed in v1.3
 * Missing support for BigInteger - Fixed in v1.3
-* Missing support for XMLGregorianCalendar - Fixed in v1.3 needs unit testing
-* Missing support for byte arrays byte[] - Hacked, needs proper fix and testing
+* Missing support for XMLGregorianCalendar - Fixed in v1.3
+* Missing support for byte arrays byte[] - Hacked in v1.3, needs proper fix and testing
 * Wrong generation for inner classes - Fixed in v1.3
 * Multiple collections initialization gives compile error - Fixed in v1.3
 * Collections initialization don't look at excluded classes (Might be RarameterType)

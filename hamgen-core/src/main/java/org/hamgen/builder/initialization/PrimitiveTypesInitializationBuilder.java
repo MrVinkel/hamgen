@@ -10,6 +10,8 @@ import java.util.List;
 
 public class PrimitiveTypesInitializationBuilder extends MatcherInitializationBuilder {
 
+    private static final String METHOD_NAME_IS = "is";
+
     @Override
     public List<Class<?>> getTypes() {
         List<Class<?>> types = new ArrayList<Class<?>>();
@@ -36,7 +38,7 @@ public class PrimitiveTypesInitializationBuilder extends MatcherInitializationBu
     public JBlock build() {
         JClass matchersClazz = codeModel.ref(Matchers.class);
 
-        JExpression assignmentExpression = matchersClazz.staticInvoke("is").arg(expected.invoke(matcherField.getGetterName()));
+        JExpression assignmentExpression = matchersClazz.staticInvoke(METHOD_NAME_IS).arg(expected.invoke(matcherField.getGetterName()));
 
         return constructorBody.assign(matcher, assignmentExpression);
     }
