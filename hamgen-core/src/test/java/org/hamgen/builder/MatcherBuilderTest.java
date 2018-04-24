@@ -57,7 +57,10 @@ public class MatcherBuilderTest {
                         "\r\n" +
                         "}\r\n";
         // Act
-        JCodeModel result = new MatcherBuilder().withClass(TestClass.class).build();
+        JCodeModel result = new MatcherBuilder()
+                .withCodeModel(new JCodeModel())
+                .withClass(TestClass.class)
+                .build();
 
         // Assert
         assertEquals(expected, codeModelToString(result));
@@ -106,6 +109,7 @@ public class MatcherBuilderTest {
 
         // Act
         JCodeModel result = new MatcherBuilder()
+                .withCodeModel(new JCodeModel())
                 .withClass(TestClass.class)
                 .withMatcherNamePostfix("MyPost")
                 .withMatcherPrefix("MyPre")
@@ -160,6 +164,7 @@ public class MatcherBuilderTest {
 
         // Act
         JCodeModel result = new MatcherBuilder()
+                .withCodeModel(new JCodeModel())
                 .withClass(TestClass.class)
                 .withMatcherNamePostfix("MyPost")
                 .withMatcherPrefix("MyPre")
@@ -245,6 +250,7 @@ public class MatcherBuilderTest {
         //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
         //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
         MatcherBuilder matcherBuilder = new MatcherBuilder()
+                .withCodeModel(new JCodeModel())
                 .withClass(MatcherBuilderTestDataSomethingElse.class)
                 .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethod("myRandomFunction"),
                         MatcherBuilderTestDataSomethingElse.class.getMethod("getMyEnum"),
@@ -325,6 +331,7 @@ public class MatcherBuilderTest {
         //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
         //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
         MatcherBuilder matcherBuilder = new MatcherBuilder()
+                .withCodeModel(new JCodeModel())
                 .withClass(MatcherBuilderTestDataListSomething.class)
                 .matchFields(MatcherBuilderTestDataListSomething.class.getMethods());
         JCodeModel result = matcherBuilder.build();
@@ -402,6 +409,7 @@ public class MatcherBuilderTest {
         //getMethods() returns a random order each time.. so we have to get the methods individually in the right order to make sure the test parses
         //I wanted to stub out the Method class, but it is not possible with PowerMock/Mockito because they themselves rely on it
         MatcherBuilder matcherBuilder = new MatcherBuilder()
+                .withCodeModel(new JCodeModel())
                 .withClass(MatcherBuilderTestDataSomethingElse.class)
                 .withExcludeTypes(excludedTypes)
                 .matchFields(MatcherBuilderTestDataSomethingElse.class.getMethod("myRandomFunction"),

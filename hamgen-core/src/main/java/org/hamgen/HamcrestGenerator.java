@@ -25,6 +25,7 @@ public class HamcrestGenerator {
 
         checkClasses(classes);
 
+        JCodeModel codeModel = new JCodeModel();
         for (Class<?> clazz : classes) {
             if (clazz.isEnum() || clazz.isPrimitive() || ClassUtil.isPrimitiveWrapper(clazz)) {
                 LOGGER.info("Skipping enum/primitive/primitiveWrapper class <" + clazz.getName() + ">");
@@ -33,15 +34,19 @@ public class HamcrestGenerator {
 
             LOGGER.debug("Building matcher for " + clazz.getName());
             MatcherBuilder matcherClassBuilder = new MatcherBuilder()
+                    .withCodeModel(codeModel)
                     .withClass(clazz)
                     .withExcludeTypes(excludeClasses)
                     .withMatcherPrefix(properties.getProperty(MATCHER_PRE_FIX))
                     .withMatcherNamePostfix(properties.getProperty(MATCHER_POST_FIX))
                     .withPackagePostFix(properties.getProperty(PACKAGE_POST_FIX))
                     .matchFields(clazz.getMethods());
-            // todo check if all needed matchers are generated for nesting
-            writeFile(matcherClassBuilder, outputDir);
+
+            codeModel = matcherClassBuilder.build();
         }
+
+        LOGGER.info("Writing files..");
+        codeModel.build(outputDir);
 
         LOGGER.info("Done!");
     }
@@ -64,11 +69,6 @@ public class HamcrestGenerator {
         boolean mkdirs = outputDir.mkdirs();
         LOGGER.debug("Mkdirs: " + mkdirs);
         return outputDir;
-    }
-
-    private void writeFile(MatcherBuilder matcherClassBuilder, File outputDir) throws Exception {
-        JCodeModel codeModel = matcherClassBuilder.build();
-        codeModel.build(outputDir);
     }
 
 }

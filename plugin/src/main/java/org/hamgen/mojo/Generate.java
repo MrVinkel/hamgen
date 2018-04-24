@@ -108,7 +108,7 @@ public class Generate extends AbstractMojo {
             generator.generateMatchers(classes, excludeClasses);
         } catch (Exception e) {
             // todo make this fantastic error handling a bit nicer
-            throw new MojoExecutionException("Buhuuu it failed :(", e);
+            throw new MojoExecutionException("Error! " + e.getMessage(), e);
         }
     }
 }

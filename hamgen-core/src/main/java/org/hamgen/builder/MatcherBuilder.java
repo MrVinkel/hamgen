@@ -40,13 +40,14 @@ public class MatcherBuilder {
     private Map<String,Class<?>> excludeTypes = new HashMap<String, Class<?>>();
     private JCodeModel codeModel;
 
-    public MatcherBuilder() {
-        this.codeModel = new JCodeModel();
+    public MatcherBuilder withCodeModel(JCodeModel codeModel) {
+        this.codeModel = codeModel;
+        return this;
     }
 
     public MatcherBuilder withClass(Class<?> originalClazz) {
         this.originalClazz = originalClazz;
-        this.originalPackageName = originalClazz.getPackage().getName().trim();
+        this.originalPackageName = new PackageNameResolver().resolvePackageName(originalClazz);
         this.originalClassName = originalClazz.getSimpleName().trim();
         return this;
     }
@@ -101,7 +102,7 @@ public class MatcherBuilder {
             type = ((ParameterizedType) type).getRawType();
         }
         String className = ((Class<?>)type).getName();
-        LOGGER.debug("isExcludedType: " + className);
+        LOGGER.debug("isExcludedType: " + className + " : " + excludeTypes.containsKey(className));
         return excludeTypes.containsKey(className);
     }
 

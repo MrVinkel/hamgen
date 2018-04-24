@@ -2,6 +2,7 @@ package org.hamgen.builder.initialization;
 
 import com.sun.codemodel.*;
 import org.hamcrest.Matchers;
+import org.hamgen.builder.PackageNameResolver;
 import org.hamgen.util.StringUtil;
 
 import java.util.Collections;
@@ -24,8 +25,11 @@ public class GeneratedClassesInitializationBuilder extends MatcherInitialization
         JExpression condition = expected.invoke(matcherField.getGetterName()).eq(JExpr._null());
         JInvocation invokeMatcherNullValue = matchersClazz.staticInvoke(METHOD_NAME_NULL_VALUE);
 
-        String generatedMatcherName = matcherField.getTypeClass().getPackage().getName() + packagePostFix + "." + matcherField.getTypeClass().getSimpleName() + matcherField.getFieldPostFix();
-        String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(matcherField.getTypeClass().getSimpleName());
+        Class<?> originalClazz = matcherField.getTypeClass();
+        String packageName = new PackageNameResolver().resolvePackageName(originalClazz);
+
+        String generatedMatcherName = packageName + packagePostFix + "." + originalClazz.getSimpleName() + matcherField.getFieldPostFix();
+        String generatedMatcherFactoryName = matcherPreFix + StringUtil.capitalizeFirstLetter(originalClazz.getSimpleName());
         JClass generatedMatcherClass = codeModel.ref(generatedMatcherName);
         JInvocation invokeGeneratedMatcher = generatedMatcherClass.staticInvoke(generatedMatcherFactoryName).arg(expected.invoke(matcherField.getGetterName()));
 
@@ -33,4 +37,5 @@ public class GeneratedClassesInitializationBuilder extends MatcherInitialization
 
         return constructorBody.assign(matcher, assignmentExpression);
     }
+
 }
