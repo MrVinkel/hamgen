@@ -206,7 +206,8 @@ Expected: {middleName is "Poul", firstName is "John", lastName is "Einstein"}
 * Missing support for byte arrays byte[] - Hacked in v1.3, needs proper fix and testing
 * Wrong generation for inner classes - Fixed in v1.3
 * Multiple collections initialization gives compile error - Fixed in v1.3
-* Collections initialization don't look at excluded classes (Might be RarameterType)
+* Collections initialization don't look at excluded classes (Might be ParameterType)
+* Nested classes with same name - Fixed
 
 ## License
 -----------
