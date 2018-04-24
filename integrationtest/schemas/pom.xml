@@ -29,7 +29,6 @@
                             <sources>
                                 <source>${basedir}/src/main/resources/xml/</source>
                             </sources>
-                            <packageName>org.hamgen.integrationtest.schemapackage</packageName>
                         </configuration>
                     </execution>
                 </executions>

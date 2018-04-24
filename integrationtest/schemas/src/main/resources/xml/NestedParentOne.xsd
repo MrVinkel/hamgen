@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://org/hamgen/integrationtest/schemapackage">
+    <xs:element name="NestedParentOne">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ElementOne" type="xs:string"/>
+                <xs:element name="NestedElement">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="ItemOne" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

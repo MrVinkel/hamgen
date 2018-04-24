@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://org/hamgen/testdata">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://org/hamgen/integrationtest/schemapackage">
     <xs:include schemaLocation="PersonNameStruct.xsd"/>
     <xs:include schemaLocation="Address.xsd"/>
+    <xs:include schemaLocation="NestedParentTwo.xsd"/>
 </xs:schema>

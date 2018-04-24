@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://org/hamgen/testdata"
-           xmlns:ns1="http://org/hamgen/testdata">
-    <xs:import namespace="http://org/hamgen/testdata" schemaLocation="import.xsd"/>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://org/hamgen/integrationtest/schemapackage"
+           xmlns:ns1="http://org/hamgen/integrationtest/schemapackage">
+    <xs:import namespace="http://org/hamgen/integrationtest/schemapackage" schemaLocation="import.xsd"/>
 
     <xs:element name="Employee">
         <xs:complexType>
